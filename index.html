@@ -1,649 +1,701 @@
-import React, { useState, useEffect } from 'react';
-import { Sun, BookOpen, PenTool, Youtube, Award, UploadCloud, History, ArrowRight, RotateCcw, Check, X } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第3課：色香味的陽光｜互動教材</title>
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_F94zepYjcV61hjVBmFWQZ6Ykh5Y2uMUbyuAdUOZtpL2fMTa4_GOCpu_iDCddhX35/exec";
+  <!-- React UMD -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 
-// --- 注入自定義樣式 ---
-const GlobalStyles = () => (
-    <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
-        
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(135deg, #FFF9C4 0%, #DCEDC8 50%, #B3E5FC 100%);
-            overscroll-behavior: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        /* 超強記憶法顏色定義 */
-        .mem-yellow { color: #F57F17; background-color: #FFF9C4; padding: 2px 8px; border-radius: 8px; font-weight: bold; } /* 主旨 */
-        .mem-blue { color: #0277BD; border-bottom: 4px solid #81D4FA; font-weight: bold; } /* 生字詞語 */
-        .mem-green { color: #2E7D32; font-style: italic; background-color: #E8F5E9; padding: 2px 8px; border-radius: 8px;} /* 感受 */
-        .mem-red { color: #C62828; border: 2px dashed #EF9A9A; padding: 2px 6px; border-radius: 8px; font-weight: bold; } /* 修辭 */
+  <!-- Babel (JSX in browser) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-        /* 動畫效果 */
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .animate-spin-slow { animation: spin 8s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        .bounce { animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        /* 大字體優化 */
-        .text-huge { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.2; }
-        .text-big { font-size: clamp(1.5rem, 4vw, 2.25rem); line-height: 1.4; }
-        .text-med { font-size: clamp(1.2rem, 3vw, 1.75rem); line-height: 1.5; }
-        
-        /* 互動按鈕 */
-        .btn-interact {
-            transition: all 0.2s;
-            box-shadow: 0 6px 0 #666;
-            transform: translateY(0);
-        }
-        .btn-interact:active {
-            box-shadow: 0 0 0 #666;
-            transform: translateY(6px);
-        }
-    `}</style>
-);
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 
-// --- 課程資料 ---
-const lessonContent = [
-    {
+  <style>
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: linear-gradient(135deg, #FFF9C4 0%, #DCEDC8 50%, #B3E5FC 100%);
+      overscroll-behavior: none;
+      margin: 0;
+      padding: 0;
+    }
+    .mem-yellow { color: #F57F17; background-color: #FFF9C4; padding: 2px 8px; border-radius: 8px; font-weight: bold; }
+    .mem-blue { color: #0277BD; border-bottom: 4px solid #81D4FA; font-weight: bold; }
+    .mem-green { color: #2E7D32; font-style: italic; background-color: #E8F5E9; padding: 2px 8px; border-radius: 8px;}
+    .mem-red { color: #C62828; border: 2px dashed #EF9A9A; padding: 2px 6px; border-radius: 8px; font-weight: bold; }
+
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .animate-spin-slow { animation: spin 8s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .bounce { animation: bounce 2s infinite; }
+    @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+
+    .text-huge { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.2; }
+    .text-big { font-size: clamp(1.5rem, 4vw, 2.25rem); line-height: 1.4; }
+    .text-med { font-size: clamp(1.2rem, 3vw, 1.75rem); line-height: 1.5; }
+
+    .btn-interact {
+      transition: all 0.2s;
+      box-shadow: 0 6px 0 #666;
+      transform: translateY(0);
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn-interact:active { box-shadow: 0 0 0 #666; transform: translateY(6px); }
+    .cursor-wait { cursor: wait; }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // Google Apps Script 部署網址
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_F94zepYjcV61hjVBmFWQZ6Ykh5Y2uMUbyuAdUOZtpL2fMTa4_GOCpu_iDCddhX35/exec";
+
+    // --- SVG Icons ---
+    const IconBase = ({ size = 24, color = "currentColor", className = "", children }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        {children}
+      </svg>
+    );
+
+    const Sun = (props) => (
+      <IconBase {...props}>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2" /><path d="M12 20v2" />
+        <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+        <path d="M2 12h2" /><path d="M20 12h2" />
+        <path d="m6.34 17.66-1.41-1.41" /><path d="m19.07 4.93-1.41 1.41" />
+      </IconBase>
+    );
+    const BookOpen = (props) => (
+      <IconBase {...props}>
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </IconBase>
+    );
+    const PenTool = (props) => (
+      <IconBase {...props}>
+        <path d="m12 19 7-7 3 3-7 7-3-3z" />
+        <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+        <path d="m2 2 7.586 7.586" />
+        <circle cx="11" cy="11" r="2" />
+      </IconBase>
+    );
+    const Youtube = (props) => (
+      <IconBase {...props}>
+        <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+        <path d="m10 15 5-3-5-3z" />
+      </IconBase>
+    );
+    const Award = (props) => (
+      <IconBase {...props}>
+        <circle cx="12" cy="8" r="7" />
+        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+      </IconBase>
+    );
+    const UploadCloud = (props) => (
+      <IconBase {...props}>
+        <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+        <path d="M12 12v9" />
+        <path d="m16 16-4-4-4 4" />
+      </IconBase>
+    );
+    const History = (props) => (
+      <IconBase {...props}>
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+        <path d="M12 7v5l4 2" />
+      </IconBase>
+    );
+    const ArrowRight = (props) => (
+      <IconBase {...props}>
+        <path d="M5 12h14" />
+        <path d="m12 5 7 7-7 7" />
+      </IconBase>
+    );
+    const RotateCcw = (props) => (
+      <IconBase {...props}>
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </IconBase>
+    );
+    const Check = (props) => (
+      <IconBase {...props}><path d="M20 6 9 17l-5-5" /></IconBase>
+    );
+    const X = (props) => (
+      <IconBase {...props}>
+        <path d="M18 6 6 18" />
+        <path d="m6 6 18 18" />
+      </IconBase>
+    );
+
+    // --- 課程資料 ---
+    const lessonContent = [
+      {
         type: 'keypoint',
         title: '課文重點 1：陽光的秘密',
         icon: '☀️',
         content: (
-            <div className="text-big text-center">
-                <span className="mem-yellow">陽光不只是光</span>，它也有
-                <br/><br/>
-                <span className="mem-green">顏色、香氣、滋味</span>
-            </div>
+          <div className="text-big text-center">
+            <span className="mem-yellow">陽光不只是光</span>，它也有
+            <br/><br/>
+            <span className="mem-green">顏色、香氣、滋味</span>
+          </div>
         ),
         tip: '記憶口訣：色香味俱全的陽光'
-    },
-    {
+      },
+      {
         type: 'keypoint',
         title: '課文重點 2：想像力的魔法',
         icon: '🌈',
         content: (
-            <div className="text-big text-center">
-                作者用<span className="mem-red">想像力</span>，把
-                <br/>
-                看不見的陽光，變得像
-                <br/>
-                <span className="mem-yellow">水果一樣具體</span>
-            </div>
+          <div className="text-big text-center">
+            作者用<span className="mem-red">想像力</span>，把
+            <br/>
+            看不見的陽光，變得像
+            <br/>
+            <span className="mem-yellow">水果一樣具體</span>
+          </div>
         ),
         tip: '把抽象變具體：光 -> 水果'
-    },
-    {
+      },
+      {
         type: 'keypoint',
         title: '課文重點 3：顏色的象徵',
         icon: '🎨',
         content: (
-            <div className="text-big text-center">
-                顏色字不只代表顏色，
-                <br/>
-                也代表<span className="mem-green">心情或感受</span>。
-                <br/><br/>
-                例如：<span className="mem-blue">金黃色</span> = 溫暖、成熟
-            </div>
+          <div className="text-big text-center">
+            顏色字不只代表顏色，
+            <br/>
+            也代表<span className="mem-green">心情或感受</span>。
+            <br/><br/>
+            例如：<span className="mem-blue">金黃色</span> = 溫暖、成熟
+          </div>
         ),
         tip: '看到顏色 -> 想到心情'
-    }
-];
+      }
+    ];
 
-// --- 題庫 ---
-const quizData = [
-    {
-        id: 1,
-        type: 'choice',
-        question: '伯伯的臉色看起來像芭樂那麼____。',
-        options: ['綠', '錄'],
-        answer: '綠',
-        explanation: '「綠」色是顏色；「錄」音是動作。',
-        category: '國字辨識'
-    },
-    {
-        id: 2,
-        type: 'choice',
-        question: '「青澀」的正確注音是？',
-        options: ['ㄑㄧㄥ ㄙㄜˋ', 'ㄑㄧㄥ ㄕㄜˋ'],
-        answer: 'ㄑㄧㄥ ㄙㄜˋ',
-        explanation: '澀 (ㄙㄜˋ) 只有一個讀音喔！',
-        category: '注音練習'
-    },
-    {
-        id: 3,
-        type: 'boolean',
-        question: '作者真的看到陽光是綠色的嗎？',
-        options: ['○ (是真的)', '✕ (是想像)'],
-        answer: '✕ (是想像)',
-        explanation: '這是作者透過樹葉感受到的「想像」畫面。',
-        category: '課文理解'
-    },
-    {
-        id: 4,
-        type: 'drag', // Simplified as matching choice for UI stability
-        question: '「陽光像金色的大網」運用了哪種修辭？',
-        options: ['擬人', '譬喻', '設問'],
-        answer: '譬喻',
-        explanation: '有「像...」就是譬喻法。',
-        category: '修辭技巧'
-    },
-    {
-        id: 5,
-        type: 'choice',
-        question: '「說不定是綠油油的吧？」這句話是？',
-        options: ['設問', '擬人'],
-        answer: '設問',
-        explanation: '心中有疑問，或是自問自答，就是設問。',
-        category: '修辭技巧'
-    },
-    {
-        id: 6,
-        type: 'choice',
-        question: '「清甜」的相反詞（反義詞）是？',
-        options: ['甘甜', '苦澀'],
-        answer: '苦澀',
-        explanation: '清甜是好吃的味道，苦澀是不好吃的。',
-        category: '詞語關係'
-    }
-];
+    // --- 題庫 ---
+    const quizData = [
+      { id: 1, type: 'choice', question: '伯伯的臉色看起來像芭樂那麼____。', options: ['綠', '錄'], answer: '綠', explanation: '「綠」色是顏色；「錄」音是動作。', category: '國字辨識' },
+      { id: 2, type: 'choice', question: '「青澀」的正確注音是？', options: ['ㄑㄧㄥ ㄙㄜˋ', 'ㄑㄧㄥ ㄕㄜˋ'], answer: 'ㄑㄧㄥ ㄙㄜˋ', explanation: '澀 (ㄙㄜˋ) 只有一個讀音喔！', category: '注音練習' },
+      { id: 3, type: 'boolean', question: '作者真的看到陽光是綠色的嗎？', options: ['○ (是真的)', '✕ (是想像)'], answer: '✕ (是想像)', explanation: '這是作者透過樹葉感受到的「想像」畫面。', category: '課文理解' },
+      { id: 4, type: 'drag', question: '「陽光像金色的大網」運用了哪種修辭？', options: ['擬人', '譬喻', '設問'], answer: '譬喻', explanation: '有「像...」就是譬喻法。', category: '修辭技巧' },
+      { id: 5, type: 'choice', question: '「說不定是綠油油的吧？」這句話是？', options: ['設問', '擬人'], answer: '設問', explanation: '心中有疑問，或是自問自答，就是設問。', category: '修辭技巧' },
+      { id: 6, type: 'choice', question: '「清甜」的相反詞（反義詞）是？', options: ['甘甜', '苦澀'], answer: '苦澀', explanation: '清甜是好吃的味道，苦澀是不好吃的。', category: '詞語關係' }
+    ];
 
-// --- 子元件 ---
-
-const LoginScreen = ({ onLogin }) => {
-    const [name, setName] = useState('');
-    return (
+    // --- Login ---
+    const LoginScreen = ({ onLogin }) => {
+      const [name, setName] = useState('');
+      return (
         <div className="flex flex-col items-center gap-8 w-full max-w-lg fade-in">
-            <div className="text-huge font-bold text-center text-orange-600">
-                歡迎來到<br/>第 3 課
-            </div>
-            <div className="w-full bg-white p-8 rounded-3xl shadow-xl border-4 border-yellow-200">
-                <label className="block text-2xl font-bold mb-4 text-gray-700 text-center">請問你叫什麼名字？</label>
-                <input 
-                    type="text" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full p-6 text-3xl text-center border-4 border-blue-200 rounded-2xl focus:border-blue-500 outline-none transition-colors bg-blue-50"
-                    placeholder="輸入姓名"
-                />
-                <button 
-                    onClick={() => onLogin(name)}
-                    className="mt-8 w-full bg-green-500 hover:bg-green-600 text-white text-3xl font-bold py-6 rounded-2xl btn-interact flex justify-center items-center gap-3"
-                >
-                    開始上課 <ArrowRight size={36} />
-                </button>
-            </div>
+          <div className="text-huge font-bold text-center text-orange-600">
+            歡迎來到<br/>第 3 課
+          </div>
+          <div className="w-full bg-white p-8 rounded-3xl shadow-xl border-4 border-yellow-200">
+            <label className="block text-2xl font-bold mb-4 text-gray-700 text-center">請問你叫什麼名字？</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-6 text-3xl text-center border-4 border-blue-200 rounded-2xl focus:border-blue-500 outline-none transition-colors bg-blue-50"
+              placeholder="輸入姓名"
+            />
+            <button
+              onClick={() => onLogin(name)}
+              className="mt-8 w-full bg-green-500 hover:bg-green-600 text-white text-3xl font-bold py-6 rounded-2xl btn-interact flex justify-center items-center gap-3"
+            >
+              開始上課 <ArrowRight size={36} />
+            </button>
+          </div>
         </div>
-    );
-};
+      );
+    };
 
-const MainMenu = ({ setView, localHistory, studentName }) => {
-    const [showHistory, setShowHistory] = useState(false);
-    
-    // Filter history for current user only
-    const myHistory = localHistory.filter(h => h.name === studentName);
-
-    if (showHistory) {
-        return (
-            <div className="w-full h-full flex flex-col fade-in">
-                 <h2 className="text-4xl font-bold text-center mb-6 text-blue-800">📜 {studentName} 的學習紀錄</h2>
-                 <div className="flex-1 overflow-y-auto bg-white rounded-2xl border-4 border-blue-200 p-4 shadow-inner max-h-[60vh]">
-                    {myHistory.length === 0 ? (
-                        <p className="text-2xl text-center text-gray-400 py-10">還沒有紀錄喔，快去挑戰！</p>
-                    ) : (
-                        <table className="w-full text-xl md:text-2xl">
-                            <thead className="bg-blue-100 text-blue-800">
-                                <tr>
-                                    <th className="p-3 text-left">時間</th>
-                                    <th className="p-3 text-center">分數</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {myHistory.map((rec, idx) => (
-                                    <tr key={idx} className="border-b border-gray-100">
-                                        <td className="p-3 text-gray-600 text-lg">{rec.date.split(' ')[0]} <br/> <span className="text-sm">{rec.date.split(' ')[1]}</span></td>
-                                        <td className="p-3 text-center font-bold text-orange-600">{rec.score} 分</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                 </div>
-                 <button onClick={() => setShowHistory(false)} className="mt-6 bg-gray-500 text-white text-2xl py-4 rounded-xl btn-interact">
-                    返回選單
-                 </button>
-            </div>
-        );
-    }
-
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl fade-in">
-            <MenuButton 
-                color="bg-red-400" 
-                icon={<Youtube size={48} />} 
-                title="影片觀賞" 
-                sub="引導、朗讀、作者動畫"
-                onClick={() => setView('video')} 
-            />
-            <MenuButton 
-                color="bg-yellow-400" 
-                icon={<BookOpen size={48} />} 
-                title="重點整理" 
-                sub="超強記憶法"
-                onClick={() => setView('study')} 
-            />
-            <MenuButton 
-                color="bg-green-500" 
-                icon={<PenTool size={48} />} 
-                title="互動挑戰" 
-                sub="測驗與小遊戲"
-                onClick={() => setView('quiz')} 
-            />
-            <MenuButton 
-                color="bg-blue-400" 
-                icon={<History size={48} />} 
-                title="學習紀錄" 
-                sub="查看我的成績"
-                onClick={() => setShowHistory(true)} 
-            />
-        </div>
-    );
-};
-
-const MenuButton = ({ color, icon, title, sub, onClick }) => (
-    <button 
+    // --- Menu ---
+    const MenuButton = ({ color, icon, title, sub, onClick }) => (
+      <button
         onClick={onClick}
         className={`${color} text-white p-8 rounded-3xl btn-interact flex flex-col items-center justify-center gap-4 h-48 md:h-64`}
-    >
+      >
         <div className="bg-white/20 p-4 rounded-full">{icon}</div>
         <div>
-            <div className="text-3xl md:text-4xl font-bold">{title}</div>
-            <div className="text-xl opacity-90 mt-1">{sub}</div>
+          <div className="text-3xl md:text-4xl font-bold">{title}</div>
+          <div className="text-xl opacity-90 mt-1">{sub}</div>
         </div>
-    </button>
-);
+      </button>
+    );
 
-const VideoSection = ({ onBack }) => {
-    const [tab, setTab] = useState(0);
-    const videos = [
+    const MainMenu = ({ setView, localHistory, studentName }) => {
+      const [showHistory, setShowHistory] = useState(false);
+      const myHistory = localHistory.filter(h => h.name === studentName);
+
+      if (showHistory) {
+        return (
+          <div className="w-full h-full flex flex-col fade-in">
+            <h2 className="text-4xl font-bold text-center mb-6 text-blue-800">📜 {studentName} 的學習紀錄</h2>
+            <div className="flex-1 overflow-y-auto bg-white rounded-2xl border-4 border-blue-200 p-4 shadow-inner max-h-[60vh]">
+              {myHistory.length === 0 ? (
+                <p className="text-2xl text-center text-gray-400 py-10">還沒有紀錄喔，快去挑戰！</p>
+              ) : (
+                <table className="w-full text-xl md:text-2xl">
+                  <thead className="bg-blue-100 text-blue-800">
+                    <tr>
+                      <th className="p-3 text-left">時間</th>
+                      <th className="p-3 text-center">分數</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {myHistory.map((rec, idx) => (
+                      <tr key={idx} className="border-b border-gray-100">
+                        <td className="p-3 text-gray-600 text-lg">
+                          {rec.date.split(' ')[0]} <br/>
+                          <span className="text-sm">{rec.date.split(' ')[1] || ''}</span>
+                        </td>
+                        <td className="p-3 text-center font-bold text-orange-600">{rec.score} 分</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <button onClick={() => setShowHistory(false)} className="mt-6 bg-gray-500 text-white text-2xl py-4 rounded-xl btn-interact">
+              返回選單
+            </button>
+          </div>
+        );
+      }
+
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl fade-in">
+          <MenuButton
+            color="bg-red-400"
+            icon={<Youtube size={48} />}
+            title="影片觀賞"
+            sub="引導、朗讀、作者動畫"
+            onClick={() => setView('video')}
+          />
+          <MenuButton
+            color="bg-yellow-400"
+            icon={<BookOpen size={48} />}
+            title="重點整理"
+            sub="超強記憶法"
+            onClick={() => setView('study')}
+          />
+          <MenuButton
+            color="bg-green-500"
+            icon={<PenTool size={48} />}
+            title="互動挑戰"
+            sub="測驗與小遊戲"
+            onClick={() => setView('quiz')}
+          />
+          <MenuButton
+            color="bg-blue-400"
+            icon={<History size={48} />}
+            title="學習紀錄"
+            sub="查看我的成績"
+            onClick={() => setShowHistory(true)}
+          />
+        </div>
+      );
+    };
+
+    // --- Video ---
+    const VideoSection = ({ onBack }) => {
+      const [tab, setTab] = useState(0);
+      const videos = [
         { title: '引導動畫', url: 'https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/引導動畫/L03引導動畫_色香味的陽光.mp4' },
         { title: '課文朗讀', url: 'https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/隨文朗讀動畫/L03隨文朗讀動畫_色香味的陽光.mp4' },
         { title: '作者動畫', url: 'https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/作者動畫/L03作者動畫_林芳萍.mp4' }
-    ];
+      ];
 
-    return (
+      return (
         <div className="w-full h-full flex flex-col fade-in">
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-                {videos.map((v, i) => (
-                    <button 
-                        key={i}
-                        onClick={() => setTab(i)}
-                        className={`px-6 py-3 rounded-xl text-xl font-bold whitespace-nowrap transition-colors ${tab === i ? 'bg-red-500 text-white shadow-lg' : 'bg-white text-gray-600 border-2 border-gray-200'}`}
-                    >
-                        {v.title}
-                    </button>
-                ))}
-            </div>
-            <div className="flex-1 bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-800">
-                <video 
-                    key={videos[tab].url}
-                    controls 
-                    className="w-full h-full object-contain"
-                    poster="https://placehold.co/800x450/333/FFF?text=Loading+Video..."
-                >
-                    <source src={videos[tab].url} type="video/mp4" />
-                    瀏覽器不支援影片播放
-                </video>
-            </div>
-            <button onClick={onBack} className="mt-6 bg-gray-500 text-white text-2xl py-3 rounded-xl btn-interact w-full">
-                返回選單
-            </button>
+          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+            {videos.map((v, i) => (
+              <button
+                key={i}
+                onClick={() => setTab(i)}
+                className={`px-6 py-3 rounded-xl text-xl font-bold whitespace-nowrap transition-colors ${tab === i ? 'bg-red-500 text-white shadow-lg' : 'bg-white text-gray-600 border-2 border-gray-200'}`}
+              >
+                {v.title}
+              </button>
+            ))}
+          </div>
+          <div className="flex-1 bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-800">
+            <video
+              key={videos[tab].url}
+              controls
+              className="w-full h-full object-contain"
+              poster="https://placehold.co/800x450/333/FFF?text=Loading+Video..."
+            >
+              <source src={videos[tab].url} type="video/mp4" />
+              瀏覽器不支援影片播放
+            </video>
+          </div>
+          <button onClick={onBack} className="mt-6 bg-gray-500 text-white text-2xl py-3 rounded-xl btn-interact w-full">
+            返回選單
+          </button>
         </div>
-    );
-};
+      );
+    };
 
-const StudySection = ({ onBack }) => {
-    const [page, setPage] = useState(0);
+    // --- Study ---
+    const StudySection = ({ onBack }) => {
+      const [page, setPage] = useState(0);
 
-    return (
+      return (
         <div className="w-full max-w-4xl flex flex-col items-center fade-in">
-            <div className="w-full bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border-b-8 border-yellow-500 min-h-[50vh] flex flex-col items-center justify-center relative">
-                <div className="absolute top-6 right-6 text-6xl animate-bounce">
-                    {lessonContent[page].icon}
-                </div>
-                
-                <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800 border-b-4 border-yellow-200 pb-2">
-                    {lessonContent[page].title}
-                </h2>
-                
-                <div className="mb-10 w-full">
-                    {lessonContent[page].content}
-                </div>
-
-                <div className="bg-blue-50 border-2 border-blue-200 p-4 rounded-xl w-full text-center">
-                    <span className="font-bold text-blue-600 text-xl">💡 超強記憶小撇步：</span>
-                    <p className="text-2xl text-gray-700 mt-2">{lessonContent[page].tip}</p>
-                </div>
+          <div className="w-full bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border-b-8 border-yellow-500 min-h-[50vh] flex flex-col items-center justify-center relative">
+            <div className="absolute top-6 right-6 text-6xl animate-bounce">
+              {lessonContent[page].icon}
             </div>
 
-            <div className="flex gap-4 mt-8 w-full">
-                <button 
-                    onClick={onBack}
-                    className="flex-1 bg-gray-400 text-white text-2xl py-4 rounded-2xl btn-interact"
-                >
-                    回選單
-                </button>
-                <button 
-                    onClick={() => setPage((prev) => (prev + 1) % lessonContent.length)}
-                    className="flex-[2] bg-yellow-400 text-yellow-900 text-3xl font-bold py-4 rounded-2xl btn-interact flex items-center justify-center gap-2"
-                >
-                    下一個重點 <ArrowRight />
-                </button>
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800 border-b-4 border-yellow-200 pb-2">
+              {lessonContent[page].title}
+            </h2>
+
+            <div className="mb-10 w-full">
+              {lessonContent[page].content}
             </div>
-            
-            <div className="mt-4 flex gap-2">
-                {lessonContent.map((_, i) => (
-                    <div key={i} className={`h-3 w-3 rounded-full ${i === page ? 'bg-yellow-500 scale-125' : 'bg-gray-300'}`}></div>
-                ))}
+
+            <div className="bg-blue-50 border-2 border-blue-200 p-4 rounded-xl w-full text-center">
+              <span className="font-bold text-blue-600 text-xl">💡 超強記憶小撇步：</span>
+              <p className="text-2xl text-gray-700 mt-2">{lessonContent[page].tip}</p>
             </div>
+          </div>
+
+          <div className="flex gap-4 mt-8 w-full">
+            <button
+              onClick={onBack}
+              className="flex-1 bg-gray-400 text-white text-2xl py-4 rounded-2xl btn-interact"
+            >
+              回選單
+            </button>
+            <button
+              onClick={() => setPage((prev) => (prev + 1) % lessonContent.length)}
+              className="flex-[2] bg-yellow-400 text-yellow-900 text-3xl font-bold py-4 rounded-2xl btn-interact flex items-center justify-center gap-2"
+            >
+              下一個重點 <ArrowRight />
+            </button>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            {lessonContent.map((_, i) => (
+              <div key={i} className={`h-3 w-3 rounded-full ${i === page ? 'bg-yellow-500 scale-125' : 'bg-gray-300'}`}></div>
+            ))}
+          </div>
         </div>
-    );
-};
+      );
+    };
 
-const QuizSection = ({ questions, onComplete, onBack }) => {
-    const [idx, setIdx] = useState(0);
-    const [feedback, setFeedback] = useState(null); // null, 'correct', 'wrong'
-    const [history, setHistory] = useState([]);
-    const [currentScore, setCurrentScore] = useState(0);
+    // --- Quiz ---
+    const QuizSection = ({ questions, onComplete, onBack }) => {
+      const [idx, setIdx] = useState(0);
+      const [feedback, setFeedback] = useState(null);
+      const [history, setHistory] = useState([]);
+      const [score, setScore] = useState(0);
 
-    const q = questions[idx];
+      const q = questions[idx];
+      const per = 100 / questions.length;
 
-    const handleAnswer = (option) => {
-        if (feedback) return; // Prevent double click
+      const handleAnswer = (option) => {
+        if (feedback) return;
 
         const isCorrect = option === q.answer;
-        
-        // Sound effect logic could go here
-        
         setFeedback(isCorrect ? 'correct' : 'wrong');
-        
-        // Record
-        const newHistory = [...history, { 
-            question: q.question, 
-            userAns: option, 
-            correctAns: q.answer, 
-            correct: isCorrect 
-        }];
-        setHistory(newHistory);
-        
-        if (isCorrect) setCurrentScore(prev => prev + 100/questions.length); // Simple scoring
 
-        // Delay for next question
+        const newHistory = [...history, {
+          question: q.question,
+          userAns: option,
+          correctAns: q.answer,
+          correct: isCorrect
+        }];
+
+        setHistory(newHistory);
+
+        // 用本地變數計算，避免 state 非同步導致最後一題少算
+        const nextScore = isCorrect ? score + per : score;
+        if (isCorrect) setScore(nextScore);
+
         setTimeout(() => {
-            setFeedback(null);
-            if (idx < questions.length - 1) {
-                setIdx(idx + 1);
-            } else {
-                onComplete(Math.round(isCorrect ? currentScore + 100/questions.length : currentScore), newHistory);
-            }
+          setFeedback(null);
+          if (idx < questions.length - 1) {
+            setIdx(idx + 1);
+          } else {
+            onComplete(Math.round(nextScore), newHistory);
+          }
         }, 2000);
+      };
+
+      const progress = Math.round((idx / questions.length) * 100);
+
+      return (
+        <div className="w-full max-w-3xl flex flex-col fade-in">
+          <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
+            <div className="bg-green-500 h-4 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+          </div>
+
+          <div className="bg-white rounded-[2rem] p-8 shadow-xl border-4 border-green-100 relative overflow-hidden">
+            {feedback && (
+              <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 bg-opacity-95 ${feedback === 'correct' ? 'bg-green-100' : 'bg-red-100'}`}>
+                <div className={`text-9xl mb-4 ${feedback === 'correct' ? 'animate-bounce' : 'animate-pulse'}`}>
+                  {feedback === 'correct' ? '⭕' : '❌'}
+                </div>
+                <h2 className={`text-4xl font-bold ${feedback === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
+                  {feedback === 'correct' ? '太棒了！答對了！' : '哎呀，再想一下！'}
+                </h2>
+                <p className="text-2xl mt-4 text-gray-700 px-8 text-center">{q.explanation}</p>
+              </div>
+            )}
+
+            <div className="flex justify-between items-center mb-6">
+              <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-bold text-xl">
+                Q{idx + 1} / {questions.length} - {q.category}
+              </span>
+            </div>
+
+            <h3 className="text-med font-bold text-gray-800 mb-10 leading-relaxed">
+              {q.question}
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {q.options.map((opt, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleAnswer(opt)}
+                  className="bg-white border-4 border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-gray-700 font-bold text-2xl md:text-3xl py-8 px-4 rounded-2xl btn-interact text-center"
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button onClick={onBack} className="mt-8 text-gray-500 text-xl underline self-center">
+            暫停，回選單
+          </button>
+        </div>
+      );
     };
 
-    return (
-        <div className="w-full max-w-3xl flex flex-col fade-in">
-            {/* Progress Bar */}
-            <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
-                <div className="bg-green-500 h-4 rounded-full transition-all duration-500" style={{ width: `${((idx)/questions.length)*100}%` }}></div>
-            </div>
-
-            <div className="bg-white rounded-[2rem] p-8 shadow-xl border-4 border-green-100 relative overflow-hidden">
-                {/* Feedback Overlay */}
-                {feedback && (
-                    <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 bg-opacity-95 ${feedback === 'correct' ? 'bg-green-100' : 'bg-red-100'}`}>
-                        <div className={`text-9xl mb-4 ${feedback === 'correct' ? 'animate-bounce' : 'animate-pulse'}`}>
-                            {feedback === 'correct' ? '⭕' : '❌'}
-                        </div>
-                        <h2 className={`text-4xl font-bold ${feedback === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
-                            {feedback === 'correct' ? '太棒了！答對了！' : '哎呀，再想一下！'}
-                        </h2>
-                        <p className="text-2xl mt-4 text-gray-700 px-8 text-center">{q.explanation}</p>
-                    </div>
-                )}
-
-                <div className="flex justify-between items-center mb-6">
-                    <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-bold text-xl">
-                        Q{idx + 1} / {questions.length} - {q.category}
-                    </span>
-                </div>
-
-                <h3 className="text-med font-bold text-gray-800 mb-10 leading-relaxed">
-                    {q.question}
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {q.options.map((opt, i) => (
-                        <button
-                            key={i}
-                            onClick={() => handleAnswer(opt)}
-                            className="bg-white border-4 border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-gray-700 font-bold text-2xl md:text-3xl py-8 px-4 rounded-2xl btn-interact text-center"
-                        >
-                            {opt}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            
-            <button onClick={onBack} className="mt-8 text-gray-500 text-xl underline self-center">
-                暫停，回選單
-            </button>
-        </div>
-    );
-};
-
-const ResultScreen = ({ score, total, history, onRestart, onUpload, uploadStatus, studentName }) => {
-    return (
+    // --- Result ---
+    const ResultScreen = ({ score, history, onRestart, onUpload, uploadStatus, studentName }) => {
+      return (
         <div className="w-full max-w-3xl flex flex-col items-center fade-in pb-10">
-            <div className="relative">
-                <Award size={120} className="text-yellow-500 mb-4 animate-bounce" />
-                <div className="absolute top-0 right-0 -mr-4 mt-2">✨</div>
-                <div className="absolute bottom-0 left-0 -ml-4 mb-2">🎉</div>
-            </div>
-            
-            <h2 className="text-5xl font-bold text-gray-800 mb-2">恭喜完成！</h2>
-            <p className="text-2xl text-gray-600 mb-8">{studentName}，你的表現太棒了！</p>
-            
-            <div className="bg-white p-8 rounded-3xl shadow-xl border-4 border-yellow-400 w-full text-center mb-8">
-                <div className="text-2xl text-gray-500 mb-2">本次得分</div>
-                <div className="text-8xl font-black text-red-500">{score}</div>
-            </div>
+          <div className="relative">
+            <Award size={120} className="text-yellow-500 mb-4 animate-bounce" />
+            <div className="absolute top-0 right-0 -mr-4 mt-2">✨</div>
+            <div className="absolute bottom-0 left-0 -ml-4 mb-2">🎉</div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-8">
-                <button 
-                    onClick={onUpload}
-                    disabled={uploadStatus === 'success' || uploadStatus === 'uploading'}
-                    className={`py-4 px-6 rounded-2xl text-2xl font-bold flex items-center justify-center gap-2 btn-interact ${
-                        uploadStatus === 'success' ? 'bg-green-500 text-white' : 
-                        uploadStatus === 'uploading' ? 'bg-gray-400 text-white cursor-wait' :
-                        'bg-blue-600 text-white'
-                    }`}
-                >
-                    {uploadStatus === 'idle' && <><UploadCloud size={32} /> 上傳成績給老師</>}
-                    {uploadStatus === 'uploading' && <>上傳中...</>}
-                    {uploadStatus === 'success' && <><Check size={32} /> 上傳成功！</>}
-                    {uploadStatus === 'error' && <><X size={32} /> 上傳失敗，請重試</>}
-                </button>
+          <h2 className="text-5xl font-bold text-gray-800 mb-2">恭喜完成！</h2>
+          <p className="text-2xl text-gray-600 mb-8">{studentName}，你的表現太棒了！</p>
 
-                <button 
-                    onClick={onRestart}
-                    className="bg-yellow-400 text-yellow-900 py-4 px-6 rounded-2xl text-2xl font-bold flex items-center justify-center gap-2 btn-interact"
-                >
-                    <RotateCcw size={32} /> 再挑戰一次
-                </button>
+          <div className="bg-white p-8 rounded-3xl shadow-xl border-4 border-yellow-400 w-full text-center mb-8">
+            <div className="text-2xl text-gray-500 mb-2">本次得分</div>
+            <div className="text-8xl font-black text-red-500">{score}</div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-8">
+            <button
+              onClick={onUpload}
+              disabled={uploadStatus === 'success' || uploadStatus === 'uploading'}
+              className={`py-4 px-6 rounded-2xl text-2xl font-bold flex items-center justify-center gap-2 btn-interact ${
+                uploadStatus === 'success' ? 'bg-green-500 text-white' :
+                uploadStatus === 'uploading' ? 'bg-gray-400 text-white cursor-wait' :
+                uploadStatus === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-600 text-white'
+              }`}
+            >
+              {uploadStatus === 'idle' && <><UploadCloud size={32} /> 上傳成績給老師</>}
+              {uploadStatus === 'uploading' && <>上傳中...</>}
+              {uploadStatus === 'success' && <><Check size={32} /> 上傳成功！</>}
+              {uploadStatus === 'error' && <><X size={32} /> 上傳失敗，請重試</>}
+            </button>
+
+            <button
+              onClick={onRestart}
+              className="bg-yellow-400 text-yellow-900 py-4 px-6 rounded-2xl text-2xl font-bold flex items-center justify-center gap-2 btn-interact"
+            >
+              <RotateCcw size={32} /> 再挑戰一次
+            </button>
+          </div>
+
+          <div className="w-full bg-pink-50 border-4 border-pink-200 p-6 rounded-2xl mb-8">
+            <h3 className="text-2xl font-bold text-pink-600 mb-4">🌟 課後小任務</h3>
+            <p className="text-xl text-gray-700 mb-4">請完成這句話並跟同學分享：</p>
+            <div className="bg-white p-4 rounded-xl text-xl leading-relaxed font-bold text-gray-600">
+              「我心中的陽光是
+              <input className="border-b-2 border-gray-400 w-24 mx-2 text-center text-blue-600 focus:outline-none" placeholder="顏色" />
+              色的，因為
+              <input className="border-b-2 border-gray-400 w-full mt-2 text-blue-600 focus:outline-none" placeholder="寫下你的原因..." />。」
             </div>
+          </div>
 
-            {/* 延伸小任務 */}
-            <div className="w-full bg-pink-50 border-4 border-pink-200 p-6 rounded-2xl mb-8">
-                <h3 className="text-2xl font-bold text-pink-600 mb-4">🌟 課後小任務</h3>
-                <p className="text-xl text-gray-700 mb-4">請完成這句話並跟同學分享：</p>
-                <div className="bg-white p-4 rounded-xl text-xl leading-relaxed font-bold text-gray-600">
-                    「我心中的陽光是
-                    <input className="border-b-2 border-gray-400 w-24 mx-2 text-center text-blue-600 focus:outline-none" placeholder="顏色" />
-                    色的，因為
-                    <input className="border-b-2 border-gray-400 w-full mt-2 text-blue-600 focus:outline-none" placeholder="寫下你的原因..." />。」
+          <div className="w-full">
+            <h3 className="text-2xl font-bold text-gray-700 mb-4">📝 答題檢討</h3>
+            <div className="space-y-4">
+              {history.map((h, i) => (
+                <div key={i} className={`p-4 rounded-xl border-l-8 ${h.correct ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'} shadow-sm`}>
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 text-2xl">{h.correct ? '⭕' : '❌'}</div>
+                    <div>
+                      <p className="font-bold text-lg text-gray-800">{h.question}</p>
+                      <p className="text-gray-600 mt-1">
+                        你的答案：<span className={h.correct ? 'text-green-600' : 'text-red-600 font-bold'}>{h.userAns}</span>
+                      </p>
+                      {!h.correct && (
+                        <p className="text-green-600 mt-1 font-bold">正確答案：{h.correctAns}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
+              ))}
             </div>
-
-            {/* 詳細檢討 */}
-            <div className="w-full">
-                <h3 className="text-2xl font-bold text-gray-700 mb-4">📝 答題檢討</h3>
-                <div className="space-y-4">
-                    {history.map((h, i) => (
-                        <div key={i} className={`p-4 rounded-xl border-l-8 ${h.correct ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'} shadow-sm`}>
-                            <div className="flex items-start gap-3">
-                                <div className="mt-1 text-2xl">{h.correct ? '⭕' : '❌'}</div>
-                                <div>
-                                    <p className="font-bold text-lg text-gray-800">{h.question}</p>
-                                    <p className="text-gray-600 mt-1">
-                                        你的答案：<span className={h.correct ? 'text-green-600' : 'text-red-600 font-bold'}>{h.userAns}</span>
-                                    </p>
-                                    {!h.correct && (
-                                        <p className="text-green-600 mt-1 font-bold">正確答案：{h.correctAns}</p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+          </div>
         </div>
-    );
-};
+      );
+    };
 
-// --- 主程式元件 ---
-export default function App() {
-    const [view, setView] = useState('login'); // login, menu, video, study, quiz, result
-    const [studentName, setStudentName] = useState('');
-    const [quizState, setQuizState] = useState({
-        currentQ: 0,
-        score: 0,
-        history: [], // { q: string, correct: boolean }
-        completed: false
-    });
-    const [localHistory, setLocalHistory] = useState([]);
-    const [uploadStatus, setUploadStatus] = useState(''); // idle, uploading, success, error
+    // --- App ---
+    const App = () => {
+      const [view, setView] = useState('login');
+      const [studentName, setStudentName] = useState('');
+      const [quizState, setQuizState] = useState({ score: 0, history: [] });
+      const [localHistory, setLocalHistory] = useState([]);
+      const [uploadStatus, setUploadStatus] = useState('idle');
+      const [lastRecord, setLastRecord] = useState(null);
 
-    // 初始化讀取歷史紀錄
-    useEffect(() => {
+      useEffect(() => {
         const saved = localStorage.getItem('sunlight_lesson_history');
         if (saved) {
-            try {
-                setLocalHistory(JSON.parse(saved));
-            } catch(e) {}
+          try { setLocalHistory(JSON.parse(saved)); } catch(e) {}
         }
-    }, []);
+      }, []);
 
-    const handleLogin = (name) => {
-        if(!name.trim()) return alert("請輸入名字喔！");
-        setStudentName(name);
+      const handleLogin = (name) => {
+        if (!name.trim()) return alert("請輸入名字喔！");
+        setStudentName(name.trim());
         setView('menu');
-    };
+      };
 
-    const saveRecord = (finalScore, detailHistory) => {
+      const saveRecord = (finalScore, detailHistory) => {
         const record = {
-            date: new Date().toLocaleString(),
-            name: studentName,
-            score: finalScore,
-            details: detailHistory
+          date: new Date().toLocaleString(),
+          name: studentName,
+          score: finalScore,
+          details: detailHistory
         };
         const newHistory = [record, ...localHistory];
         setLocalHistory(newHistory);
         localStorage.setItem('sunlight_lesson_history', JSON.stringify(newHistory));
+        setLastRecord(record);
         return record;
-    };
+      };
 
-    const uploadToGoogle = async (record) => {
+      const uploadToGoogle = async (record) => {
+        if (!record) return;
         setUploadStatus('uploading');
+
         const formData = new FormData();
         formData.append('name', record.name);
-        formData.append('score', record.score);
+        formData.append('score', String(record.score));
         formData.append('date', record.date);
         formData.append('detail', JSON.stringify(record.details.map(d => d.correct ? 'O' : 'X')));
 
         try {
-            // 使用 no-cors 模式發送，因為通常 Apps Script 不會設定複雜的 CORS headers
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: formData,
-                mode: 'no-cors' 
-            });
-            // 由於 no-cors 不會回傳 readable response，我們假設只要沒拋出錯誤就是成功送出
-            setUploadStatus('success');
-            setTimeout(() => setUploadStatus('idle'), 3000);
-        } catch (error) {
-            console.error("Upload failed", error);
-            setUploadStatus('error');
+          // no-cors：可送出但無法讀回應（所以無法 100% 判斷後端是否成功寫入）
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: formData,
+            mode: 'no-cors'
+          });
+          setUploadStatus('success');
+          setTimeout(() => setUploadStatus('idle'), 3000);
+        } catch (err) {
+          console.error(err);
+          setUploadStatus('error');
         }
+      };
+
+      return (
+        <div className="min-h-screen w-full max-w-4xl mx-auto bg-white shadow-2xl overflow-hidden relative font-sans">
+          <header className="bg-yellow-400 p-4 border-b-4 border-yellow-600 flex justify-between items-center z-10 relative">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-2 rounded-full border-2 border-orange-500">
+                <Sun size={32} color="#F59E0B" className="animate-spin-slow" />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-wider">色香味的陽光</h1>
+            </div>
+            {studentName && (
+              <div className="bg-white px-4 py-2 rounded-xl border-2 border-yellow-600 font-bold text-lg text-yellow-800">
+                👤 {studentName}
+              </div>
+            )}
+          </header>
+
+          <main className="p-4 md:p-8 min-h-[80vh] flex flex-col items-center justify-center relative">
+            {view === 'login' && <LoginScreen onLogin={handleLogin} />}
+
+            {view === 'menu' && (
+              <MainMenu setView={setView} localHistory={localHistory} studentName={studentName} />
+            )}
+
+            {view === 'video' && <VideoSection onBack={() => setView('menu')} />}
+
+            {view === 'study' && <StudySection onBack={() => setView('menu')} />}
+
+            {view === 'quiz' && (
+              <QuizSection
+                questions={quizData}
+                onComplete={(score, history) => {
+                  saveRecord(score, history);
+                  setQuizState({ score, history });
+                  setView('result');
+                }}
+                onBack={() => setView('menu')}
+              />
+            )}
+
+            {view === 'result' && (
+              <ResultScreen
+                score={quizState.score}
+                history={quizState.history}
+                studentName={studentName}
+                uploadStatus={uploadStatus}
+                onUpload={() => uploadToGoogle(lastRecord)}
+                onRestart={() => {
+                  setUploadStatus('idle');
+                  setView('menu');
+                }}
+              />
+            )}
+          </main>
+
+          <div className="absolute bottom-0 left-0 w-full h-4 bg-gradient-to-r from-green-400 via-yellow-400 to-blue-400"></div>
+        </div>
+      );
     };
 
-    // 渲染視圖切換
-    return (
-        <div className="min-h-screen w-full max-w-4xl mx-auto bg-white shadow-2xl overflow-hidden relative font-sans">
-            <GlobalStyles />
-            {/* Header */}
-            <header className="bg-yellow-400 p-4 border-b-4 border-yellow-600 flex justify-between items-center z-10 relative">
-                <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-full border-2 border-orange-500">
-                        <Sun size={32} color="#F59E0B" className="animate-spin-slow" />
-                    </div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-wider">色香味的陽光</h1>
-                </div>
-                {studentName && (
-                    <div className="bg-white px-4 py-2 rounded-xl border-2 border-yellow-600 font-bold text-lg text-yellow-800">
-                        👤 {studentName}
-                    </div>
-                )}
-            </header>
-
-            {/* Content Area */}
-            <main className="p-4 md:p-8 min-h-[80vh] flex flex-col items-center justify-center relative">
-                {view === 'login' && <LoginScreen onLogin={handleLogin} />}
-                {view === 'menu' && <MainMenu setView={setView} localHistory={localHistory} studentName={studentName}/>}
-                {view === 'video' && <VideoSection onBack={() => setView('menu')} />}
-                {view === 'study' && <StudySection onBack={() => setView('menu')} />}
-                {view === 'quiz' && <QuizSection 
-                    questions={quizData} 
-                    onComplete={(score, history) => {
-                        const record = saveRecord(score, history);
-                        setQuizState({ score, history, completed: true });
-                        setView('result');
-                    }} 
-                    onBack={() => setView('menu')}
-                />}
-                {view === 'result' && <ResultScreen 
-                    score={quizState.score} 
-                    total={quizData.length}
-                    history={quizState.history}
-                    studentName={studentName}
-                    onUpload={() => uploadToGoogle({
-                        name: studentName,
-                        score: quizState.score,
-                        date: new Date().toLocaleString(),
-                        details: quizState.history
-                    })}
-                    uploadStatus={uploadStatus}
-                    onRestart={() => setView('menu')}
-                />}
-            </main>
-
-            {/* Footer decoration */}
-            <div className="absolute bottom-0 left-0 w-full h-4 bg-gradient-to-r from-green-400 via-yellow-400 to-blue-400"></div>
-        </div>
-    );
-};
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
