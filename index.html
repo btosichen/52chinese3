@@ -1,1050 +1,1956 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>第3課：色香味的陽光｜互動教材</title>
-    <!-- 引入 React 核心 (使用 UMD 版本以支援瀏覽器直接執行) -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <!-- 引入 Babel 用來在瀏覽器端即時解析 JSX 語法 -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- 引入 Tailwind CSS 用於快速樣式設計 -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Noto Sans TC 中文字型 -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(135deg, #FFF9C4 0%, #DCEDC8 50%, #B3E5FC 100%);
-            overscroll-behavior: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        /* --- 超強記憶法顏色定義 --- */
-        .mem-yellow { color: #F57F17; background-color: #FFF9C4; padding: 2px 8px; border-radius: 8px; font-weight: bold; }
-        .mem-blue { color: #0277BD; border-bottom: 4px solid #81D4FA; font-weight: bold; }
-        .mem-green { color: #2E7D32; font-style: italic; background-color: #E8F5E9; padding: 2px 8px; border-radius: 8px;}
-        .mem-red { color: #C62828; border: 2px dashed #EF9A9A; padding: 2px 6px; border-radius: 8px; font-weight: bold; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第3課：色香味的陽光｜互動教學大冒險</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#fff8c9;
+      --bg2:#dff4d4;
+      --bg3:#cfeeff;
+      --yellow:#ffd54f;
+      --orange:#ffb74d;
+      --green:#66bb6a;
+      --green-dark:#2e7d32;
+      --blue:#42a5f5;
+      --blue-dark:#1565c0;
+      --pink:#ff8fb1;
+      --red:#ef5350;
+      --purple:#7e57c2;
+      --card:#ffffffee;
+      --shadow:0 12px 28px rgba(0,0,0,.14);
+      --radius:24px;
+      --text:#304050;
+      --muted:#687787;
+      --line:#d9e6ef;
+    }
 
-        /* --- 動畫效果 --- */
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .animate-spin-slow { animation: spin 8s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        .bounce { animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      padding:0;
+      font-family:"Noto Sans TC",system-ui,sans-serif;
+      color:var(--text);
+      background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 45%,var(--bg3) 100%);
+      min-height:100%;
+    }
 
-        /* --- 大字體優化 --- */
-        .text-huge { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.2; }
-        .text-big { font-size: clamp(1.5rem, 4vw, 2.25rem); line-height: 1.4; }
-        .text-med { font-size: clamp(1.2rem, 3vw, 1.75rem); line-height: 1.5; }
-        
-        /* --- 互動按鈕樣式 --- */
-        .btn-interact {
-            transition: all 0.2s;
-            box-shadow: 0 6px 0 #666;
-            transform: translateY(0);
-            cursor: pointer;
-            user-select: none;
-        }
-        .btn-interact:active {
-            box-shadow: 0 0 0 #666;
-            transform: translateY(6px);
-        }
-        .cursor-wait {
-            cursor: wait;
-        }
-    </style>
+    body{
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    .app{
+      width:min(1100px,100%);
+      margin:0 auto;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      background:linear-gradient(90deg,#ffe082,#ffd54f);
+      border-bottom:4px solid #f9a825;
+      box-shadow:0 6px 20px rgba(0,0,0,.08);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .sun-badge{
+      width:54px;
+      height:54px;
+      border-radius:50%;
+      background:#fff;
+      display:grid;
+      place-items:center;
+      border:3px solid #ffb300;
+      font-size:28px;
+      animation:spinSlow 8s linear infinite;
+      flex-shrink:0;
+    }
+
+    @keyframes spinSlow{
+      from{transform:rotate(0deg)}
+      to{transform:rotate(360deg)}
+    }
+
+    .brand-title{
+      font-size:clamp(1.15rem,2vw,1.8rem);
+      font-weight:900;
+      letter-spacing:.04em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .player-pill{
+      background:#fff;
+      border:2px solid #f9a825;
+      border-radius:16px;
+      padding:10px 14px;
+      font-weight:800;
+      color:#8d6e00;
+      min-width:fit-content;
+      display:none;
+    }
+
+    .main{
+      flex:1;
+      padding:20px 16px 32px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .screen{
+      width:100%;
+      display:none;
+      animation:fadeIn .35s ease;
+    }
+
+    .screen.active{
+      display:block;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0; transform:translateY(10px)}
+      to{opacity:1; transform:translateY(0)}
+    }
+
+    .card{
+      background:var(--card);
+      backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,.5);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .hero-card{
+      width:min(680px,100%);
+      margin:0 auto;
+      padding:28px;
+      text-align:center;
+      border:4px solid #ffe082;
+    }
+
+    .hero-title{
+      font-size:clamp(2rem,4vw,3.25rem);
+      font-weight:900;
+      color:#ef6c00;
+      margin:0 0 20px;
+      line-height:1.15;
+    }
+
+    .hero-sub{
+      color:var(--muted);
+      font-size:1.1rem;
+      margin-bottom:18px;
+    }
+
+    .login-box{
+      margin-top:14px;
+      text-align:left;
+    }
+
+    .label{
+      display:block;
+      font-weight:800;
+      margin-bottom:10px;
+      font-size:1.15rem;
+    }
+
+    .input{
+      width:100%;
+      border:3px solid #bbdefb;
+      background:#f5fbff;
+      border-radius:18px;
+      padding:18px 16px;
+      font-size:1.35rem;
+      outline:none;
+      transition:.2s ease;
+    }
+
+    .input:focus{
+      border-color:#42a5f5;
+      box-shadow:0 0 0 4px rgba(66,165,245,.15);
+    }
+
+    .btn{
+      border:none;
+      outline:none;
+      cursor:pointer;
+      user-select:none;
+      border-radius:18px;
+      padding:16px 20px;
+      font-weight:900;
+      font-size:1.15rem;
+      transition:.18s ease;
+      box-shadow:0 7px 0 rgba(0,0,0,.22);
+      transform:translateY(0);
+    }
+
+    .btn:hover{filter:brightness(1.02)}
+    .btn:active{
+      transform:translateY(6px);
+      box-shadow:0 1px 0 rgba(0,0,0,.22);
+    }
+
+    .btn-block{width:100%}
+    .btn-green{background:#4caf50;color:#fff}
+    .btn-yellow{background:#ffd54f;color:#6d4c00}
+    .btn-blue{background:#42a5f5;color:#fff}
+    .btn-red{background:#ef5350;color:#fff}
+    .btn-gray{background:#78909c;color:#fff}
+    .btn-purple{background:#7e57c2;color:#fff}
+    .btn-pink{background:#ff8fb1;color:#fff}
+    .btn-outline{
+      background:#fff;
+      color:#546e7a;
+      border:2px solid #cfd8dc;
+      box-shadow:0 5px 0 rgba(0,0,0,.12);
+    }
+
+    .menu-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+      width:min(900px,100%);
+      margin:0 auto;
+    }
+
+    .menu-btn{
+      min-height:220px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      gap:12px;
+      padding:20px;
+      color:#fff;
+      border-radius:28px;
+      box-shadow:0 12px 28px rgba(0,0,0,.16);
+      cursor:pointer;
+      transition:.18s ease;
+      border:none;
+    }
+
+    .menu-btn:hover{transform:translateY(-3px)}
+    .menu-btn .emoji{font-size:3rem}
+    .menu-btn .title{font-size:1.9rem;font-weight:900}
+    .menu-btn .sub{font-size:1.05rem;opacity:.95}
+
+    .menu-red{background:linear-gradient(135deg,#ff8a65,#ef5350)}
+    .menu-yellow{background:linear-gradient(135deg,#ffd54f,#ffb300); color:#6d4c00}
+    .menu-green{background:linear-gradient(135deg,#66bb6a,#43a047)}
+    .menu-blue{background:linear-gradient(135deg,#64b5f6,#1e88e5)}
+
+    .panel{
+      width:min(980px,100%);
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .panel-title{
+      font-size:clamp(1.6rem,2.8vw,2.4rem);
+      margin:0 0 12px;
+      font-weight:900;
+      color:#1976d2;
+    }
+
+    .panel-sub{
+      margin:0 0 18px;
+      color:var(--muted);
+      font-size:1.02rem;
+    }
+
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+    }
+
+    .video-tabs{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      padding-bottom:6px;
+      margin-bottom:14px;
+    }
+
+    .tab{
+      border:none;
+      background:#fff;
+      border:2px solid #e3edf5;
+      color:#546e7a;
+      border-radius:14px;
+      padding:12px 16px;
+      font-weight:800;
+      white-space:nowrap;
+      cursor:pointer;
+    }
+
+    .tab.active{
+      background:#ef5350;
+      color:#fff;
+      border-color:#ef5350;
+      box-shadow:0 8px 18px rgba(239,83,80,.25);
+    }
+
+    .video-box{
+      background:#000;
+      border-radius:22px;
+      overflow:hidden;
+      border:4px solid #263238;
+      min-height:320px;
+      box-shadow:var(--shadow);
+    }
+
+    video{
+      width:100%;
+      height:min(65vh,620px);
+      object-fit:contain;
+      background:#000;
+      display:block;
+    }
+
+    .study-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .study-progress{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .dot{
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      background:#d0d7de;
+      transition:.2s ease;
+    }
+
+    .dot.active{
+      background:#ffb300;
+      transform:scale(1.2);
+    }
+
+    .study-card{
+      min-height:430px;
+      padding:28px;
+      border-bottom:8px solid #ffca28;
+      position:relative;
+    }
+
+    .study-icon{
+      position:absolute;
+      top:18px;
+      right:18px;
+      font-size:3rem;
+      animation:bounce 1.8s infinite;
+    }
+
+    @keyframes bounce{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-8px)}
+    }
+
+    .study-title{
+      font-size:1.9rem;
+      font-weight:900;
+      margin:0 0 18px;
+      color:#37474f;
+      padding-bottom:8px;
+      border-bottom:4px solid #ffecb3;
+    }
+
+    .study-content{
+      font-size:1.35rem;
+      line-height:1.8;
+      color:#455a64;
+      min-height:210px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:12px;
+    }
+
+    .tip{
+      margin-top:20px;
+      background:#f1f9ff;
+      border:2px solid #bbdefb;
+      border-radius:18px;
+      padding:16px;
+      text-align:center;
+      font-size:1.2rem;
+      font-weight:700;
+      color:#1e88e5;
+    }
+
+    .mem-yellow{color:#f57f17;background:#fff9c4;padding:2px 8px;border-radius:8px;font-weight:900}
+    .mem-blue{color:#0277bd;border-bottom:4px solid #81d4fa;font-weight:900}
+    .mem-green{color:#2e7d32;background:#e8f5e9;padding:2px 8px;border-radius:8px;font-style:italic;font-weight:800}
+    .mem-red{color:#c62828;border:2px dashed #ef9a9a;padding:2px 6px;border-radius:8px;font-weight:900}
+
+    .quiz-layout{
+      display:grid;
+      grid-template-columns:300px minmax(0,1fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .quiz-side{
+      padding:18px;
+      position:sticky;
+      top:92px;
+    }
+
+    .stat-card{
+      background:#fff;
+      border:2px solid #e3edf5;
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .stat-title{
+      font-weight:900;
+      color:#607d8b;
+      margin-bottom:8px;
+      font-size:1rem;
+    }
+
+    .stat-big{
+      font-size:1.7rem;
+      font-weight:900;
+      color:#1565c0;
+    }
+
+    .energy{
+      height:14px;
+      background:#e3edf5;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .energy > div{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#66bb6a,#43a047);
+      transition:.3s ease;
+    }
+
+    .fruit-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .fruit{
+      background:#f7fbff;
+      border:2px dashed #c6d7e5;
+      border-radius:14px;
+      min-height:54px;
+      display:grid;
+      place-items:center;
+      font-size:1.6rem;
+      transition:.2s ease;
+    }
+
+    .fruit.collected{
+      background:#fff8e1;
+      border-style:solid;
+      border-color:#ffca28;
+      transform:scale(1.03);
+    }
+
+    .question-card{
+      padding:20px;
+    }
+
+    .question-top{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#e3f2fd;
+      color:#1565c0;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:.95rem;
+      font-weight:900;
+    }
+
+    .progress{
+      width:100%;
+      height:16px;
+      background:#eceff1;
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:18px;
+    }
+
+    .progress > div{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#66bb6a,#8bc34a);
+      transition:.3s ease;
+    }
+
+    .question-text{
+      font-size:clamp(1.35rem,2.4vw,2rem);
+      line-height:1.65;
+      color:#37474f;
+      font-weight:900;
+      margin-bottom:18px;
+    }
+
+    .option-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .option{
+      border:none;
+      background:#fff;
+      border:3px solid #d9e6ef;
+      border-radius:20px;
+      padding:18px 14px;
+      min-height:92px;
+      font-size:1.22rem;
+      font-weight:800;
+      color:#455a64;
+      cursor:pointer;
+      transition:.18s ease;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+      text-align:center;
+    }
+
+    .option:hover{
+      border-color:#64b5f6;
+      background:#f4fbff;
+      transform:translateY(-2px);
+    }
+
+    .option.correct{
+      background:#e8f5e9;
+      border-color:#66bb6a;
+      color:#2e7d32;
+    }
+
+    .option.wrong{
+      background:#ffebee;
+      border-color:#ef5350;
+      color:#c62828;
+    }
+
+    .feedback{
+      margin-top:18px;
+      border-radius:20px;
+      padding:18px;
+      display:none;
+      border:3px solid transparent;
+    }
+
+    .feedback.show{display:block}
+    .feedback.correct{
+      background:#e8f5e9;
+      border-color:#66bb6a;
+    }
+    .feedback.wrong{
+      background:#ffebee;
+      border-color:#ef5350;
+    }
+
+    .feedback-title{
+      font-size:1.5rem;
+      font-weight:900;
+      margin:0 0 8px;
+    }
+
+    .feedback p{
+      margin:8px 0 0;
+      line-height:1.8;
+      font-size:1.08rem;
+      color:#455a64;
+      font-weight:700;
+    }
+
+    .result-wrap{
+      width:min(920px,100%);
+      margin:0 auto;
+    }
+
+    .trophy{
+      font-size:5rem;
+      text-align:center;
+      animation:bounce 1.5s infinite;
+    }
+
+    .result-title{
+      text-align:center;
+      font-size:clamp(2rem,4vw,3rem);
+      font-weight:900;
+      margin:8px 0 6px;
+    }
+
+    .result-sub{
+      text-align:center;
+      color:var(--muted);
+      font-size:1.15rem;
+      margin-bottom:18px;
+    }
+
+    .score-box{
+      text-align:center;
+      padding:24px;
+      border:4px solid #ffd54f;
+      margin-bottom:18px;
+    }
+
+    .score-num{
+      font-size:clamp(3rem,8vw,5.5rem);
+      font-weight:900;
+      color:#ef5350;
+      line-height:1;
+    }
+
+    .result-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .mini{
+      text-align:center;
+      padding:18px;
+    }
+
+    .mini .k{
+      color:#78909c;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .mini .v{
+      font-size:1.8rem;
+      font-weight:900;
+      color:#1976d2;
+    }
+
+    .stars{
+      text-align:center;
+      font-size:2rem;
+      margin:8px 0 18px;
+      letter-spacing:.15em;
+    }
+
+    .mission{
+      padding:18px;
+      background:#fff1f5;
+      border:3px solid #ffc1d5;
+      border-radius:22px;
+      margin-bottom:18px;
+    }
+
+    .mission h3{
+      margin:0 0 10px;
+      color:#d81b60;
+      font-size:1.4rem;
+    }
+
+    .mission-input{
+      display:block;
+      width:100%;
+      margin-top:10px;
+      padding:14px 12px;
+      border:2px solid #f8bbd0;
+      border-radius:14px;
+      font-size:1.05rem;
+      background:#fff;
+      outline:none;
+    }
+
+    .review{
+      padding:18px;
+    }
+
+    .review h3{
+      margin:0 0 12px;
+      font-size:1.4rem;
+      color:#455a64;
+    }
+
+    .review-item{
+      border-left:8px solid #b0bec5;
+      background:#fafcff;
+      border-radius:16px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .review-item.correct{
+      border-color:#66bb6a;
+      background:#f4fff5;
+    }
+
+    .review-item.wrong{
+      border-color:#ef5350;
+      background:#fff7f7;
+    }
+
+    .review-q{
+      font-weight:900;
+      line-height:1.7;
+      margin-bottom:6px;
+    }
+
+    .review-a{
+      color:#546e7a;
+      line-height:1.7;
+      font-weight:700;
+    }
+
+    .history-table-wrap{
+      overflow:auto;
+      border-radius:20px;
+      border:3px solid #bbdefb;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:720px;
+    }
+
+    th,td{
+      padding:14px 12px;
+      border-bottom:1px solid #e8eef3;
+      text-align:center;
+    }
+
+    th{
+      background:#e3f2fd;
+      color:#1565c0;
+      font-weight:900;
+      position:sticky;
+      top:0;
+    }
+
+    .footer-line{
+      height:10px;
+      background:linear-gradient(90deg,#66bb6a,#ffd54f,#42a5f5,#ff8fb1);
+      margin-top:auto;
+    }
+
+    .empty{
+      text-align:center;
+      color:#90a4ae;
+      padding:28px 12px;
+      font-size:1.2rem;
+      font-weight:800;
+    }
+
+    .badge-line{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#fff8e1;
+      color:#8d6e00;
+      border:2px solid #ffe082;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:.95rem;
+    }
+
+    .helper{
+      color:#78909c;
+      font-size:.96rem;
+      line-height:1.8;
+    }
+
+    @media (max-width: 860px){
+      .menu-grid{grid-template-columns:1fr}
+      .quiz-layout{grid-template-columns:1fr}
+      .quiz-side{position:static}
+      .option-grid{grid-template-columns:1fr}
+      .result-grid{grid-template-columns:1fr}
+      .player-pill{font-size:.95rem;padding:8px 10px}
+      .sun-badge{width:46px;height:46px;font-size:24px}
+    }
+
+    @media (max-width: 520px){
+      .topbar{padding:12px}
+      .main{padding:16px 10px 24px}
+      .panel,.hero-card,.question-card,.quiz-side,.review,.score-box{padding:16px}
+      .study-card{padding:18px}
+      .menu-btn{min-height:180px}
+      .brand-title{font-size:1.05rem}
+      .player-pill{display:none !important}
+    }
+  </style>
 </head>
 <body>
-    <div id="root"></div>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="sun-badge">☀️</div>
+        <div class="brand-title">第3課：色香味的陽光｜互動教學大冒險</div>
+      </div>
+      <div class="player-pill" id="playerPill">👤 同學</div>
+    </header>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        
-        // Google Apps Script 部署網址
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_F94zepYjcV61hjVBmFWQZ6Ykh5Y2uMUbyuAdUOZtpL2fMTa4_GOCpu_iDCddhX35/exec";
+    <main class="main">
+      <!-- Login -->
+      <section id="screen-login" class="screen active">
+        <div class="hero-card card">
+          <h1 class="hero-title">歡迎來到<br>色香味的陽光</h1>
+          <div class="hero-sub">今天要一起用顏色、氣味、味道和想像力，走進課文的陽光世界 ✨</div>
 
-        // --- SVG 圖示元件 ---
-        const IconBase = ({ size = 24, color = "currentColor", className = "", children }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                {children}
-            </svg>
-        );
+          <div class="login-box">
+            <label class="label" for="studentName">請輸入你的姓名</label>
+            <input id="studentName" class="input" type="text" placeholder="輸入姓名後開始冒險">
+            <div class="toolbar">
+              <button class="btn btn-green btn-block" id="btnStartLogin">開始上課 ➜</button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        const Sun = (props) => (
-            <IconBase {...props}>
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2" />
-                <path d="M12 20v2" />
-                <path d="m4.93 4.93 1.41 1.41" />
-                <path d="m17.66 17.66 1.41 1.41" />
-                <path d="M2 12h2" />
-                <path d="M20 12h2" />
-                <path d="m6.34 17.66-1.41-1.41" />
-                <path d="m19.07 4.93-1.41 1.41" />
-            </IconBase>
-        );
-        const BookOpen = (props) => (
-            <IconBase {...props}>
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-            </IconBase>
-        );
-        const PenTool = (props) => (
-            <IconBase {...props}>
-                <path d="m12 19 7-7 3 3-7 7-3-3z" />
-                <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-                <path d="m2 2 7.586 7.586" />
-                <circle cx="11" cy="11" r="2" />
-            </IconBase>
-        );
-        const Youtube = (props) => (
-            <IconBase {...props}>
-                <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
-                <path d="m10 15 5-3-5-3z" />
-            </IconBase>
-        );
-        const Award = (props) => (
-            <IconBase {...props}>
-                <circle cx="12" cy="8" r="7" />
-                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
-            </IconBase>
-        );
-        const UploadCloud = (props) => (
-            <IconBase {...props}>
-                <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-                <path d="M12 12v9" />
-                <path d="m16 16-4-4-4 4" />
-            </IconBase>
-        );
-        const History = (props) => (
-            <IconBase {...props}>
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-                <path d="M12 7v5l4 2" />
-            </IconBase>
-        );
-        const ArrowRight = (props) => (
-            <IconBase {...props}>
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-            </IconBase>
-        );
-        const RotateCcw = (props) => (
-            <IconBase {...props}>
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-            </IconBase>
-        );
-        const Check = (props) => (
-            <IconBase {...props}>
-                <path d="M20 6 9 17l-5-5" />
-            </IconBase>
-        );
-        const X = (props) => (
-            <IconBase {...props}>
-                <path d="M18 6 6 18" />
-                <path d="m6 6 18 18" />
-            </IconBase>
-        );
+      <!-- Menu -->
+      <section id="screen-menu" class="screen">
+        <div class="menu-grid">
+          <button class="menu-btn menu-red" id="btnGoVideo">
+            <div class="emoji">🎬</div>
+            <div class="title">影片觀賞</div>
+            <div class="sub">引導動畫、課文朗讀、作者動畫</div>
+          </button>
 
-        // --- 小工具：答案正規化 ---
-        const norm = (s) => (String(s ?? '').replace(/\s+/g,'').trim());
+          <button class="menu-btn menu-yellow" id="btnGoStudy">
+            <div class="emoji">📚</div>
+            <div class="title">重點整理</div>
+            <div class="sub">課程重點＋自學重點＋超強記憶法</div>
+          </button>
 
-        // --- 課程資料 ---
-        const lessonContent = [
-            {
-                type: 'keypoint',
-                title: '課文重點 1：陽光的秘密',
-                icon: '☀️',
-                content: (
-                    <div className="text-big text-center">
-                        <span className="mem-yellow">陽光不只是光</span>，它也有
-                        <br/><br/>
-                        <span className="mem-green">顏色、香氣、滋味</span>
-                    </div>
-                ),
-                tip: '記憶口訣：色香味俱全的陽光'
-            },
-            {
-                type: 'keypoint',
-                title: '課文重點 2：想像力的魔法',
-                icon: '🌈',
-                content: (
-                    <div className="text-big text-center">
-                        作者用<span className="mem-red">想像力</span>，把
-                        <br/>
-                        看不見的陽光，變得像
-                        <br/>
-                        <span className="mem-yellow">水果一樣具體</span>
-                    </div>
-                ),
-                tip: '把抽象變具體：光 -> 水果'
-            },
-            {
-                type: 'keypoint',
-                title: '課文重點 3：顏色的象徵',
-                icon: '🎨',
-                content: (
-                    <div className="text-big text-center">
-                        顏色字不只代表顏色，
-                        <br/>
-                        也代表<span className="mem-green">心情或感受</span>。
-                        <br/><br/>
-                        例如：<span className="mem-blue">金黃色</span> = 溫暖、成熟
-                    </div>
-                ),
-                tip: '看到顏色 -> 想到心情'
-            }
-        ];
+          <button class="menu-btn menu-green" id="btnGoQuiz">
+            <div class="emoji">🎯</div>
+            <div class="title">互動挑戰</div>
+            <div class="sub">20 題闖關，蒐集水果、拿星星</div>
+          </button>
 
-        // --- 題庫資料：原本快速暖身 ---
-        const warmupQuizData = [
-            {
-                id: 1,
-                type: 'choice',
-                question: '伯伯的臉色看起來像芭樂那麼____。',
-                options: ['綠', '錄'],
-                answer: '綠',
-                explanation: '「綠」色是顏色；「錄」音是動作。',
-                category: '國字辨識'
-            },
-            {
-                id: 2,
-                type: 'choice',
-                question: '「青澀」的正確注音是？',
-                options: ['ㄑㄧㄥ ㄙㄜˋ', 'ㄑㄧㄥ ㄕㄜˋ'],
-                answer: 'ㄑㄧㄥ ㄙㄜˋ',
-                explanation: '澀 (ㄙㄜˋ) 只有一個讀音喔！',
-                category: '注音練習'
-            },
-            {
-                id: 3,
-                type: 'boolean',
-                question: '作者真的看到陽光是綠色的嗎？',
-                options: ['○ (是真的)', '✕ (是想像)'],
-                answer: '✕ (是想像)',
-                explanation: '這是作者透過樹葉感受到的「想像」畫面。',
-                category: '課文理解'
-            },
-            {
-                id: 4,
-                type: 'drag', 
-                question: '「陽光像金色的大網」運用了哪種修辭？',
-                options: ['擬人', '譬喻', '設問'],
-                answer: '譬喻',
-                explanation: '有「像...」就是譬喻法。',
-                category: '修辭技巧'
-            },
-            {
-                id: 5,
-                type: 'choice',
-                question: '「說不定是綠油油的吧？」這句話是？',
-                options: ['設問', '擬人'],
-                answer: '設問',
-                explanation: '心中有疑問，或是自問自答，就是設問。',
-                category: '修辭技巧'
-            },
-            {
-                id: 6,
-                type: 'choice',
-                question: '「清甜」的相反詞（反義詞）是？',
-                options: ['甘甜', '苦澀'],
-                answer: '苦澀',
-                explanation: '清甜是好吃的味道，苦澀是不好吃的。',
-                category: '詞語關係'
-            }
-        ];
+          <button class="menu-btn menu-blue" id="btnGoHistory">
+            <div class="emoji">📜</div>
+            <div class="title">學習紀錄</div>
+            <div class="sub">查看自己的歷次作答成績</div>
+          </button>
+        </div>
+      </section>
 
-        // --- 題庫資料：課文理解挑戰（你提供的 19 題：成語＋修辭）---
-        const comprehensionChallengeData = [
-            // 成語選擇題 1-4
-            {
-                id: 101,
-                type: 'choice',
-                question: '果園裡的水果顏色鮮豔，看起來＿＿＿＿。',
-                options: ['A 五彩繽紛','B 問道於盲','C 窮途末路','D 一席之地'],
-                answer: 'A 五彩繽紛',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
-            {
-                id: 102,
-                type: 'choice',
-                question: '這次園遊會準備得很充分，大家都覺得活動會辦得＿＿＿＿。',
-                options: ['A 勇冠三軍','B 轟轟烈烈','C 血盆大口','D 刁鑽古怪'],
-                answer: 'B 轟轟烈烈',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
-            {
-                id: 103,
-                type: 'choice',
-                question: '老師提醒我們要記取前人的錯誤，當作＿＿＿＿。',
-                options: ['A 莫逆之交','B 前車之鑑','C 險遭不測','D 易如反掌'],
-                answer: 'B 前車之鑑',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
-            {
-                id: 104,
-                type: 'choice',
-                question: '果樹下的陽光灑落在地面，和綠葉互相襯托，顯得＿＿＿＿。',
-                options: ['A 相映成趣','B 千軍萬馬','C 窮途末路','D 問道於盲'],
-                answer: 'A 相映成趣',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
+      <!-- Video -->
+      <section id="screen-video" class="screen">
+        <div class="panel card">
+          <h2 class="panel-title">🎬 影片觀賞</h2>
+          <p class="panel-sub">先看動畫，再回頭做題目，腦袋會比較有感。這就像先開地圖再解任務，會比較不會迷路。</p>
 
-            // 成語是非題 5-7
-            {
-                id: 105,
-                type: 'boolean',
-                question: '「五彩繽紛」可以用來形容顏色很多、很漂亮的景象。',
-                options: ['○','✕'],
-                answer: '○',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
-            {
-                id: 106,
-                type: 'boolean',
-                question: '「前車之鑑」是指事情進行得很順利。',
-                options: ['○','✕'],
-                answer: '✕',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
-            {
-                id: 107,
-                type: 'boolean',
-                question: '「轟轟烈烈」常用來形容事情的聲勢很大。',
-                options: ['○','✕'],
-                answer: '○',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
+          <div class="video-tabs">
+            <button class="tab active" data-video-index="0">引導動畫</button>
+            <button class="tab" data-video-index="1">課文朗讀</button>
+            <button class="tab" data-video-index="2">作者動畫</button>
+          </div>
 
-            // 找出錯字並改正 8-10（改成可輸入作答）
-            {
-                id: 108,
-                type: 'input',
-                question: '找出錯字並改正：五采繽紛 → （　　　）',
-                answer: '五彩繽紛',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
-            {
-                id: 109,
-                type: 'input',
-                question: '找出錯字並改正：前車之監 → （　　　）',
-                answer: '前車之鑑',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
-            {
-                id: 110,
-                type: 'input',
-                question: '找出錯字並改正：相應成趣 → （　　　）',
-                answer: '相映成趣',
-                explanation: '完成！',
-                category: '課文理解挑戰｜成語'
-            },
+          <div class="video-box">
+            <video id="videoPlayer" controls poster="https://placehold.co/1200x700/222/FFF?text=Loading+Video...">
+              <source id="videoSource" src="" type="video/mp4">
+              瀏覽器不支援影片播放
+            </video>
+          </div>
 
-            // 修辭辨識 11-13
-            {
-                id: 111,
-                type: 'choice',
-                question: '「陽光像金雨般密密的灑下來。」這一句使用了哪一種修辭？',
-                options: ['A 擬人','B 明喻','C 排比','D 感嘆'],
-                answer: 'B 明喻',
-                explanation: '完成！',
-                category: '課文理解挑戰｜修辭'
-            },
-            {
-                id: 112,
-                type: 'choice',
-                question: '「枝頭多了幾個紅色的小鈴鐺，在風裡輕輕哼唱。」這一句主要使用的修辭是：',
-                options: ['A 疊字','B 譬喻','C 擬人','D 排比'],
-                answer: 'C 擬人',
-                explanation: '完成！',
-                category: '課文理解挑戰｜修辭'
-            },
-            {
-                id: 113,
-                type: 'choice',
-                question: '「葡萄變紫了，木瓜變黃了，芭樂也變翠綠了。」這一句使用了哪一種修辭？',
-                options: ['A 排比','B 設問','C 誇飾','D 引用'],
-                answer: 'A 排比',
-                explanation: '完成！',
-                category: '課文理解挑戰｜修辭'
-            },
+          <div class="toolbar">
+            <button class="btn btn-gray" data-back-menu>返回選單</button>
+          </div>
+        </div>
+      </section>
 
-            // 修辭是非題 14-16
-            {
-                id: 114,
-                type: 'boolean',
-                question: '「靜悄悄、綠油油、圓圓點點」屬於疊字修辭。',
-                options: ['○','✕'],
-                answer: '○',
-                explanation: '完成！',
-                category: '課文理解挑戰｜修辭'
-            },
-            {
-                id: 115,
-                type: 'boolean',
-                question: '「我想，葡萄藤上的陽光可能是紫色的吧？」是設問句。',
-                options: ['○','✕'],
-                answer: '○',
-                explanation: '完成！',
-                category: '課文理解挑戰｜修辭'
-            },
-            {
-                id: 116,
-                type: 'boolean',
-                question: '「陽光張開翅膀，在果樹上盤旋。」把陽光當成人來寫。',
-                options: ['○','✕'],
-                answer: '○',
-                explanation: '完成！',
-                category: '課文理解挑戰｜修辭'
-            },
+      <!-- Study -->
+      <section id="screen-study" class="screen">
+        <div class="panel">
+          <div class="study-header">
+            <div>
+              <h2 class="panel-title">📚 重點整理＋自學重點</h2>
+              <p class="panel-sub">這裡不是死背區，是把課文拆成「好記、好懂、好答題」的版本。</p>
+            </div>
+            <div class="study-progress" id="studyDots"></div>
+          </div>
 
-            // 修辭配對 17-18
-            {
-                id: 117,
-                type: 'choice',
-                question: '「張口一咬，一股青澀味像條青竹絲，火速鑽進嘴裡。」最符合的修辭是：',
-                options: ['A 明喻','B 暗喻','C 擬人','D 排比'],
-                answer: 'A 明喻',
-                explanation: '完成！',
-                category: '課文理解挑戰｜修辭'
-            },
-            {
-                id: 118,
-                type: 'choice',
-                question: '「陽光把我的臉晒得比蓮霧還要紅。」這一句使用了：',
-                options: ['A 誇飾','B 設問','C 引用','D 排比'],
-                answer: 'A 誇飾',
-                explanation: '完成！',
-                category: '課文理解挑戰｜修辭'
-            },
+          <div class="study-card card">
+            <div class="study-icon" id="studyIcon">☀️</div>
+            <h3 class="study-title" id="studyTitle"></h3>
+            <div class="study-content" id="studyContent"></div>
+            <div class="tip" id="studyTip"></div>
+          </div>
 
-            // 綜合 19
-            {
-                id: 119,
-                type: 'choice',
-                question: '下列哪一句最符合〈色香味的陽光〉的寫作特色？',
-                options: ['A 用顏色、氣味和味道描寫陽光','B 詳細說明水果的生長過程','C 介紹農業知識','D 說明果園的歷史'],
-                answer: 'A 用顏色、氣味和味道描寫陽光',
-                explanation: '完成！',
-                category: '課文理解挑戰｜綜合'
-            }
-        ];
+          <div class="toolbar">
+            <button class="btn btn-gray" data-back-menu>回選單</button>
+            <button class="btn btn-yellow" id="btnPrevStudy">⬅ 上一個重點</button>
+            <button class="btn btn-blue" id="btnNextStudy">下一個重點 ➜</button>
+          </div>
+        </div>
+      </section>
 
-        // --- 元件：登入畫面 ---
-        const LoginScreen = ({ onLogin }) => {
-            const [name, setName] = useState('');
-            return (
-                <div className="flex flex-col items-center gap-8 w-full max-w-lg fade-in">
-                    <div className="text-huge font-bold text-center text-orange-600">
-                        歡迎來到<br/>第 3 課
-                    </div>
-                    <div className="w-full bg-white p-8 rounded-3xl shadow-xl border-4 border-yellow-200">
-                        <label className="block text-2xl font-bold mb-4 text-gray-700 text-center">請問你叫什麼名字？</label>
-                        <input 
-                            type="text" 
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full p-6 text-3xl text-center border-4 border-blue-200 rounded-2xl focus:border-blue-500 outline-none transition-colors bg-blue-50"
-                            placeholder="輸入姓名"
-                        />
-                        <button 
-                            onClick={() => onLogin(name)}
-                            className="mt-8 w-full bg-green-500 hover:bg-green-600 text-white text-3xl font-bold py-6 rounded-2xl btn-interact flex justify-center items-center gap-3"
-                        >
-                            開始上課 <ArrowRight size={36} />
-                        </button>
-                    </div>
-                </div>
-            );
-        };
+      <!-- Quiz -->
+      <section id="screen-quiz" class="screen">
+        <div class="panel">
+          <h2 class="panel-title">🎯 互動挑戰</h2>
+          <p class="panel-sub">共 20 題，包含修辭、成語、課文大意、字詞理解。答對越多，水果蒐集越完整，陽光能量越滿。</p>
 
-        // --- 元件：主選單 ---
-        const MainMenu = ({ setView, localHistory, studentName }) => {
-            const [showHistory, setShowHistory] = useState(false);
-            const myHistory = localHistory.filter(h => h.name === studentName);
+          <div class="quiz-layout">
+            <aside class="quiz-side card">
+              <div class="stat-card">
+                <div class="stat-title">⏱ 挑戰時間</div>
+                <div class="stat-big" id="timerText">00:00</div>
+              </div>
 
-            if (showHistory) {
-                return (
-                    <div className="w-full h-full flex flex-col fade-in">
-                         <h2 className="text-4xl font-bold text-center mb-6 text-blue-800">📜 {studentName} 的學習紀錄</h2>
-                         <div className="flex-1 overflow-y-auto bg-white rounded-2xl border-4 border-blue-200 p-4 shadow-inner max-h-[60vh]">
-                            {myHistory.length === 0 ? (
-                                <p className="text-2xl text-center text-gray-400 py-10">還沒有紀錄喔，快去挑戰！</p>
-                            ) : (
-                                <table className="w-full text-xl md:text-2xl">
-                                    <thead className="bg-blue-100 text-blue-800">
-                                        <tr>
-                                            <th className="p-3 text-left">時間</th>
-                                            <th className="p-3 text-center">分數</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {myHistory.map((rec, idx) => (
-                                            <tr key={idx} className="border-b border-gray-100">
-                                                <td className="p-3 text-gray-600 text-lg">{rec.date.split(' ')[0]} <br/> <span className="text-sm">{rec.date.split(' ')[1]}</span></td>
-                                                <td className="p-3 text-center font-bold text-orange-600">{rec.score} 分</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                         </div>
-                         <button onClick={() => setShowHistory(false)} className="mt-6 bg-gray-500 text-white text-2xl py-4 rounded-xl btn-interact">
-                            返回選單
-                         </button>
-                    </div>
-                );
-            }
+              <div class="stat-card">
+                <div class="stat-title">⚡ 陽光能量</div>
+                <div class="energy"><div id="energyBar"></div></div>
+                <div class="helper" style="margin-top:8px;">答對越多，能量條越滿。這條不是裝飾，是主角氣勢值。</div>
+              </div>
 
-            return (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl fade-in">
-                    <MenuButton 
-                        color="bg-red-400" 
-                        icon={<Youtube size={48} />} 
-                        title="影片觀賞" 
-                        sub="引導、朗讀、作者動畫"
-                        onClick={() => setView('video')} 
-                    />
-                    <MenuButton 
-                        color="bg-yellow-400" 
-                        icon={<BookOpen size={48} />} 
-                        title="重點整理" 
-                        sub="超強記憶法"
-                        onClick={() => setView('study')} 
-                    />
-                    <MenuButton 
-                        color="bg-green-500" 
-                        icon={<PenTool size={48} />} 
-                        title="互動挑戰" 
-                        sub="先選題組再開打"
-                        onClick={() => setView('quiz')} 
-                    />
-                    <MenuButton 
-                        color="bg-blue-400" 
-                        icon={<History size={48} />} 
-                        title="學習紀錄" 
-                        sub="查看我的成績"
-                        onClick={() => setShowHistory(true)} 
-                    />
-                </div>
-            );
-        };
+              <div class="stat-card">
+                <div class="stat-title">🍇 水果蒐集</div>
+                <div class="fruit-grid" id="fruitGrid"></div>
+              </div>
 
-        const MenuButton = ({ color, icon, title, sub, onClick }) => (
-            <button 
-                onClick={onClick}
-                className={`${color} text-white p-8 rounded-3xl btn-interact flex flex-col items-center justify-center gap-4 h-48 md:h-64`}
-            >
-                <div className="bg-white/20 p-4 rounded-full">{icon}</div>
-                <div>
-                    <div className="text-3xl md:text-4xl font-bold">{title}</div>
-                    <div className="text-xl opacity-90 mt-1">{sub}</div>
-                </div>
-            </button>
-        );
+              <div class="stat-card">
+                <div class="stat-title">🏅 即時成績</div>
+                <div class="stat-big"><span id="correctCount">0</span> / 20</div>
+                <div class="badge-line" id="liveBadges"></div>
+              </div>
 
-        // --- 元件：影片區 ---
-        const VideoSection = ({ onBack }) => {
-            const [tab, setTab] = useState(0);
-            const videos = [
-                { title: '引導動畫', url: 'https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/引導動畫/L03引導動畫_色香味的陽光.mp4' },
-                { title: '課文朗讀', url: 'https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/隨文朗讀動畫/L03隨文朗讀動畫_色香味的陽光.mp4' },
-                { title: '作者動畫', url: 'https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/作者動畫/L03作者動畫_林芳萍.mp4' }
-            ];
+              <div class="toolbar" style="margin-top:10px">
+                <button class="btn btn-outline btn-block" id="btnPauseQuiz">暫停回選單</button>
+              </div>
+            </aside>
 
-            return (
-                <div className="w-full h-full flex flex-col fade-in">
-                    <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-                        {videos.map((v, i) => (
-                            <button 
-                                key={i}
-                                onClick={() => setTab(i)}
-                                className={`px-6 py-3 rounded-xl text-xl font-bold whitespace-nowrap transition-colors ${tab === i ? 'bg-red-500 text-white shadow-lg' : 'bg-white text-gray-600 border-2 border-gray-200'}`}
-                            >
-                                {v.title}
-                            </button>
-                        ))}
-                    </div>
-                    <div className="flex-1 bg-black rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-800">
-                        <video 
-                            key={videos[tab].url}
-                            controls 
-                            className="w-full h-full object-contain"
-                            poster="https://placehold.co/800x450/333/FFF?text=Loading+Video..."
-                        >
-                            <source src={videos[tab].url} type="video/mp4" />
-                            瀏覽器不支援影片播放
-                        </video>
-                    </div>
-                    <button onClick={onBack} className="mt-6 bg-gray-500 text-white text-2xl py-3 rounded-xl btn-interact w-full">
-                        返回選單
-                    </button>
-                </div>
-            );
-        };
+            <div class="question-card card">
+              <div class="question-top">
+                <div class="chip" id="qChip">Q1 / 20</div>
+                <div class="chip" id="qCategory">類別</div>
+              </div>
 
-        // --- 元件：重點學習區 ---
-        const StudySection = ({ onBack }) => {
-            const [page, setPage] = useState(0);
+              <div class="progress"><div id="quizProgress"></div></div>
 
-            return (
-                <div className="w-full max-w-4xl flex flex-col items-center fade-in">
-                    <div className="w-full bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border-b-8 border-yellow-500 min-h-[50vh] flex flex-col items-center justify-center relative">
-                        <div className="absolute top-6 right-6 text-6xl animate-bounce">
-                            {lessonContent[page].icon}
-                        </div>
-                        
-                        <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800 border-b-4 border-yellow-200 pb-2">
-                            {lessonContent[page].title}
-                        </h2>
-                        
-                        <div className="mb-10 w-full">
-                            {lessonContent[page].content}
-                        </div>
+              <div class="question-text" id="questionText"></div>
+              <div class="option-grid" id="optionGrid"></div>
 
-                        <div className="bg-blue-50 border-2 border-blue-200 p-4 rounded-xl w-full text-center">
-                            <span className="font-bold text-blue-600 text-xl">💡 超強記憶小撇步：</span>
-                            <p className="text-2xl text-gray-700 mt-2">{lessonContent[page].tip}</p>
-                        </div>
-                    </div>
+              <div class="feedback" id="feedbackBox">
+                <h3 class="feedback-title" id="feedbackTitle"></h3>
+                <p id="feedbackText"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                    <div className="flex gap-4 mt-8 w-full">
-                        <button 
-                            onClick={onBack}
-                            className="flex-1 bg-gray-400 text-white text-2xl py-4 rounded-2xl btn-interact"
-                        >
-                            回選單
-                        </button>
-                        <button 
-                            onClick={() => setPage((prev) => (prev + 1) % lessonContent.length)}
-                            className="flex-[2] bg-yellow-400 text-yellow-900 text-3xl font-bold py-4 rounded-2xl btn-interact flex items-center justify-center gap-2"
-                        >
-                            下一個重點 <ArrowRight />
-                        </button>
-                    </div>
-                    
-                    <div className="mt-4 flex gap-2">
-                        {lessonContent.map((_, i) => (
-                            <div key={i} className={`h-3 w-3 rounded-full ${i === page ? 'bg-yellow-500 scale-125' : 'bg-gray-300'}`}></div>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
+      <!-- Result -->
+      <section id="screen-result" class="screen">
+        <div class="result-wrap">
+          <div class="trophy">🏆</div>
+          <div class="result-title">恭喜完成挑戰！</div>
+          <div class="result-sub" id="resultSub">同學，你今天把陽光的秘密都拆開來看了。</div>
 
-        // --- 元件：測驗區（新增：題組選擇 + input 題型） ---
-        const QuizSection = ({ questionSets, onComplete, onBack }) => {
-            const [phase, setPhase] = useState('select'); // select | play
-            const [setKey, setSetKey] = useState(null);
+          <div class="score-box card">
+            <div style="font-size:1.2rem;color:#78909c;font-weight:800;margin-bottom:8px;">本次得分</div>
+            <div class="score-num" id="finalScore">0</div>
+          </div>
 
-            const [idx, setIdx] = useState(0);
-            const [feedback, setFeedback] = useState(null); 
-            const [history, setHistory] = useState([]);
-            const [currentScore, setCurrentScore] = useState(0);
-            const [inputAns, setInputAns] = useState('');
+          <div class="stars" id="starDisplay">⭐</div>
 
-            const questions = setKey ? questionSets[setKey].questions : [];
-            const q = questions[idx];
+          <div class="result-grid">
+            <div class="mini card">
+              <div class="k">答對題數</div>
+              <div class="v" id="finalCorrect">0</div>
+            </div>
+            <div class="mini card">
+              <div class="k">挑戰時間</div>
+              <div class="v" id="finalTime">00:00</div>
+            </div>
+            <div class="mini card">
+              <div class="k">稱號</div>
+              <div class="v" id="finalTitle">陽光新手</div>
+            </div>
+          </div>
 
-            const resetRun = (newKey) => {
-                setSetKey(newKey);
-                setPhase('play');
-                setIdx(0);
-                setFeedback(null);
-                setHistory([]);
-                setCurrentScore(0);
-                setInputAns('');
-            };
+          <div class="toolbar" style="justify-content:center">
+            <button class="btn btn-blue" id="btnUploadScore">☁️ 上傳成績給老師</button>
+            <button class="btn btn-yellow" id="btnReplay">🔁 再挑戰一次</button>
+            <button class="btn btn-gray" data-back-menu>返回選單</button>
+          </div>
 
-            const handleAnswer = (option) => {
-                if (feedback) return;
+          <div class="mission card">
+            <h3>🌈 課後小任務</h3>
+            <div class="helper">把課文帶回生活裡。不是只有考試能用，寫作也能直接用。</div>
+            <input class="mission-input" id="missionColor" placeholder="我心中的陽光是＿＿色的">
+            <input class="mission-input" id="missionReason" placeholder="因為＿＿＿＿＿＿＿＿＿＿">
+          </div>
 
-                const isCorrect = norm(option) === norm(q.answer);
-                setFeedback(isCorrect ? 'correct' : 'wrong');
+          <div class="review card">
+            <h3>📝 答題檢討</h3>
+            <div id="reviewList"></div>
+          </div>
+        </div>
+      </section>
 
-                const newHistory = [...history, { 
-                    question: q.question, 
-                    userAns: option, 
-                    correctAns: q.answer, 
-                    correct: isCorrect 
-                }];
-                setHistory(newHistory);
+      <!-- History -->
+      <section id="screen-history" class="screen">
+        <div class="panel card">
+          <h2 class="panel-title">📜 學習紀錄</h2>
+          <p class="panel-sub">這裡會記錄這台裝置上你的作答結果。localStorage 很誠實，不會偷偷幫你加分（可惡但真實）。</p>
 
-                if (isCorrect) setCurrentScore(prev => prev + 100/questions.length);
+          <div class="history-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>時間</th>
+                  <th>姓名</th>
+                  <th>得分</th>
+                  <th>答對題數</th>
+                  <th>耗時</th>
+                  <th>稱號</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
 
-                setTimeout(() => {
-                    setFeedback(null);
-                    setInputAns('');
-                    if (idx < questions.length - 1) {
-                        setIdx(idx + 1);
-                    } else {
-                        const finalScore = Math.round(isCorrect ? currentScore + 100/questions.length : currentScore);
-                        onComplete(finalScore, newHistory, questionSets[setKey].title);
-                    }
-                }, 1800);
-            };
+          <div id="historyEmpty" class="empty" style="display:none">還沒有學習紀錄，先去闖關一下吧。</div>
 
-            const submitInput = () => {
-                if (feedback) return;
-                handleAnswer(inputAns);
-            };
+          <div class="toolbar">
+            <button class="btn btn-gray" data-back-menu>返回選單</button>
+            <button class="btn btn-red" id="btnClearHistory">清除本機紀錄</button>
+          </div>
+        </div>
+      </section>
+    </main>
 
-            if (phase === 'select') {
-                return (
-                    <div className="w-full max-w-3xl fade-in">
-                        <h2 className="text-4xl font-black text-center text-green-700 mb-3">🎯 互動挑戰</h2>
-                        <p className="text-xl text-center text-gray-700 mb-8">先選一個題組：你要暖身，還是直接開大招？</p>
+    <div class="footer-line"></div>
+  </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {Object.entries(questionSets).map(([key, pack]) => (
-                                <button
-                                    key={key}
-                                    onClick={() => resetRun(key)}
-                                    className={`p-8 rounded-3xl btn-interact text-left border-4 ${
-                                        key === 'challenge'
-                                            ? 'bg-purple-600 text-white border-purple-200'
-                                            : 'bg-white text-gray-800 border-green-200'
-                                    }`}
-                                >
-                                    <div className="text-3xl font-black mb-2">{pack.title}</div>
-                                    <div className="text-xl opacity-95 mb-4">{pack.sub}</div>
-                                    <div className="inline-flex items-center gap-2 bg-black/10 px-4 py-2 rounded-xl text-lg font-bold">
-                                        題數：{pack.questions.length} 題 <ArrowRight />
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+  <script>
+    // =============================
+    // 可自行填入 GAS 網址
+    // =============================
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_F94zepYjcV61hjVBmFWQZ6Ykh5Y2uMUbyuAdUOZtpL2fMTa4_GOCpu_iDCddhX35/exec";
 
-                        <button onClick={onBack} className="mt-8 text-gray-600 text-xl underline block mx-auto">
-                            不玩了（先回選單）
-                        </button>
-                    </div>
-                );
-            }
+    // =============================
+    // 課文影片
+    // =============================
+    const videos = [
+      {
+        title: "引導動畫",
+        url: "https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/%E5%BC%95%E5%B0%8E%E5%8B%95%E7%95%AB/L03%E5%BC%95%E5%B0%8E%E5%8B%95%E7%95%AB_%E8%89%B2%E9%A6%99%E5%91%B3%E7%9A%84%E9%99%BD%E5%85%89.mp4"
+      },
+      {
+        title: "課文朗讀",
+        url: "https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/%E9%9A%A8%E6%96%87%E6%9C%97%E8%AE%80%E5%8B%95%E7%95%AB/L03%E9%9A%A8%E6%96%87%E6%9C%97%E8%AE%80%E5%8B%95%E7%95%AB_%E8%89%B2%E9%A6%99%E5%91%B3%E7%9A%84%E9%99%BD%E5%85%89.mp4"
+      },
+      {
+        title: "作者動畫",
+        url: "https://nanivideo-download.oneclass.com.tw/media/ade61c76931ba7f9/video/%E4%BD%9C%E8%80%85%E5%8B%95%E7%95%AB/L03%E4%BD%9C%E8%80%85%E5%8B%95%E7%95%AB_%E6%9E%97%E8%8A%B3%E8%90%8D.mp4"
+      }
+    ];
 
-            return (
-                <div className="w-full max-w-3xl flex flex-col fade-in">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="text-xl font-black text-gray-700">
-                            題組：<span className="text-green-700">{questionSets[setKey].title}</span>
-                        </div>
-                        <button
-                            onClick={() => setPhase('select')}
-                            className="text-lg text-gray-600 underline"
-                        >
-                            換題組
-                        </button>
-                    </div>
+    // =============================
+    // 重點整理
+    // =============================
+    const studyCards = [
+      {
+        icon:"☀️",
+        title:"課文主題：陽光居然也有色香味",
+        content:`
+          <div>
+            <span class="mem-yellow">作者把陽光想像成有顏色、有香氣、有滋味</span><br><br>
+            這不是自然課的定義，這是文學裡的想像力。<br>
+            用五官去感受生活，文字就會突然活起來。
+          </div>
+        `,
+        tip:"超強記法：陽光不是只有亮，還有色、香、味。"
+      },
+      {
+        icon:"🍎",
+        title:"陽光的顏色想像",
+        content:`
+          <div>
+            蓮霧樹上的陽光 → <span class="mem-red">紅色</span><br>
+            葡萄藤上的陽光 → <span class="mem-blue">紫色</span><br>
+            木瓜樹上的陽光 → <span class="mem-yellow">橘黃色</span><br>
+            芭樂樹上的陽光 → <span class="mem-green">綠油油</span>
+          </div>
+        `,
+        tip:"看到水果顏色，就聯想到陽光顏色。這題超容易出。"
+      },
+      {
+        icon:"👃",
+        title:"陽光的香氣與味道",
+        content:`
+          <div>
+            蓮霧香 → <span class="mem-green">清甜</span><br>
+            葡萄香 → <span class="mem-blue">酸甜</span><br>
+            木瓜香 → <span class="mem-yellow">熟甜</span><br>
+            芭樂香 → <span class="mem-green">清香</span><br><br>
+            作者用<span class="mem-red">嗅覺</span>和<span class="mem-red">味覺</span>描寫陽光。
+          </div>
+        `,
+        tip:"記法：看顏色是視覺，聞香味是嗅覺，吃青澀是味覺。"
+      },
+      {
+        icon:"✨",
+        title:"重要修辭 1：明喻",
+        content:`
+          <div>
+            例句：<span class="mem-yellow">陽光像金雨般密密的灑下來</span><br><br>
+            有「像、如、彷彿、好像」這類詞，常常就是<span class="mem-red">明喻</span>。
+          </div>
+        `,
+        tip:"看到『像』，八九不離十先想明喻。"
+      },
+      {
+        icon:"🪽",
+        title:"重要修辭 2：擬人",
+        content:`
+          <div>
+            例句：<span class="mem-yellow">陽光張開翅膀</span><br>
+            例句：<span class="mem-yellow">小鈴鐺在風裡輕輕哼唱</span><br><br>
+            把不是人的事物，寫得像人會做的動作，就是<span class="mem-red">擬人</span>。
+          </div>
+        `,
+        tip:"不是人，卻會親吻、張開翅膀、哼唱，就是擬人。"
+      },
+      {
+        icon:"🧩",
+        title:"重要修辭 3：排比",
+        content:`
+          <div>
+            例句：<span class="mem-yellow">葡萄變紫了，木瓜變黃了，芭樂也變翠綠了</span><br><br>
+            連續出現結構相近的句子，形成節奏感，就是<span class="mem-red">排比</span>。
+          </div>
+        `,
+        tip:"三個以上、句型很像、連續排開，很常就是排比。"
+      },
+      {
+        icon:"📖",
+        title:"課文大意",
+        content:`
+          <div>
+            作者回憶在阿嬤家果園裡，<span class="mem-yellow">用想像力感受陽光的顏色、香氣與滋味</span>；<br>
+            又寫到偷摘芭樂、被伯伯發現、隔天去道歉的經過，<br>
+            表現出<span class="mem-green">童年的趣味、羞愧與反省</span>。
+          </div>
+        `,
+        tip:"前半段是美好感受，後半段是事件與反省。"
+      },
+      {
+        icon:"🧠",
+        title:"自學重點：顏色字不一定只是在寫顏色",
+        content:`
+          <div>
+            課文與練習裡都提醒我們：<br><br>
+            <span class="mem-red">紅</span> 可以是顏色，也可以指走紅、受歡迎。<br>
+            <span class="mem-green">綠</span> 可以是顏色，也可能表示生氣、臉色難看。<br>
+            <span class="mem-blue">白</span> 也可能不是白色，而是其他意思。<br><br>
+            所以讀句子時要看<span class="mem-yellow">上下文</span>。
+          </div>
+        `,
+        tip:"顏色字＝可能有多重意思，不能只靠表面猜。"
+      },
+      {
+        icon:"🙋",
+        title:"自學重點：讀完課文要會回答什麼",
+        content:`
+          <div style="text-align:left; display:inline-block;">
+            ✔ 作者為什麼覺得陽光有顏色？<br>
+            ✔ 作者為什麼覺得陽光有香味？<br>
+            ✔ 作者摘芭樂後的心情是什麼？<br>
+            ✔ 伯伯最後為什麼原諒作者？<br>
+            ✔ 這篇文章主要想表達什麼？
+          </div>
+        `,
+        tip:"能回答『為什麼』，才是真的懂課文，不只是背句子。"
+      }
+    ];
 
-                    <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
-                        <div className="bg-green-500 h-4 rounded-full transition-all duration-500" style={{ width: `${((idx)/questions.length)*100}%` }}></div>
-                    </div>
+    // =============================
+    // 題庫 20 題
+    // =============================
+    const quizData = [
+      {
+        id:1,
+        category:"成語",
+        question:"果園裡的水果顏色鮮豔，看起來＿＿＿＿。",
+        options:["五彩繽紛","問道於盲","窮途末路","一席之地"],
+        answer:"五彩繽紛",
+        explanation:"「五彩繽紛」用來形容色彩繁多而豔麗，最適合描述水果顏色很多、很漂亮的樣子。"
+      },
+      {
+        id:2,
+        category:"成語",
+        question:"老師提醒我們要記取前人的錯誤，當作＿＿＿＿。",
+        options:["莫逆之交","前車之鑑","易如反掌","血盆大口"],
+        answer:"前車之鑑",
+        explanation:"「前車之鑑」是把以前失敗的例子當成後來的教訓。"
+      },
+      {
+        id:3,
+        category:"成語",
+        question:"果樹下的陽光與綠葉互相襯托，顯得＿＿＿＿。",
+        options:["相映成趣","千軍萬馬","窮途末路","問道於盲"],
+        answer:"相映成趣",
+        explanation:"「相映成趣」就是互相映襯，讓畫面更有趣、更好看。"
+      },
+      {
+        id:4,
+        category:"修辭",
+        question:"「陽光像金雨般密密的灑下來。」這句主要用了哪一種修辭？",
+        options:["擬人","明喻","排比","設問"],
+        answer:"明喻",
+        explanation:"句子裡有「像」這個喻詞，所以是明喻。"
+      },
+      {
+        id:5,
+        category:"修辭",
+        question:"「陽光張開翅膀，在這些果樹的頭上盤旋著。」這句用了哪一種修辭？",
+        options:["擬人","引用","排比","設問"],
+        answer:"擬人",
+        explanation:"讓陽光像人或動物一樣會張開翅膀、會盤旋，這就是擬人。"
+      },
+      {
+        id:6,
+        category:"修辭",
+        question:"「葡萄變紫了，木瓜變黃了，芭樂也變翠綠了。」這句用了哪一種修辭？",
+        options:["誇飾","排比","設問","引用"],
+        answer:"排比",
+        explanation:"三個句型相似的句子連續排列，就是排比。"
+      },
+      {
+        id:7,
+        category:"課文大意",
+        question:"下列哪一句最符合〈色香味的陽光〉的寫作特色？",
+        options:["用顏色、氣味和味道描寫陽光","詳細說明水果的生長過程","介紹農業知識","說明果園的歷史"],
+        answer:"用顏色、氣味和味道描寫陽光",
+        explanation:"這篇文章的特色，就是用五官感受和想像力，把陽光寫得很有畫面。"
+      },
+      {
+        id:8,
+        category:"課文理解",
+        question:"作者覺得蓮霧樹上的陽光應該是什麼顏色？",
+        options:["紅色","紫色","黑色","白色"],
+        answer:"紅色",
+        explanation:"因為蓮霧本身紅通通的，所以作者想像蓮霧樹上的陽光也是紅色。"
+      },
+      {
+        id:9,
+        category:"課文理解",
+        question:"作者覺得葡萄藤上的陽光可能是什麼顏色？",
+        options:["紫色","藍色","灰色","白色"],
+        answer:"紫色",
+        explanation:"葡萄是紫色的，所以作者想像葡萄藤上的陽光也是紫色。"
+      },
+      {
+        id:10,
+        category:"課文理解",
+        question:"作者聞到的木瓜香是什麼感覺？",
+        options:["苦澀","熟甜","辛辣","鹹香"],
+        answer:"熟甜",
+        explanation:"課文中明確寫到作者聞到了熟甜的木瓜香。"
+      },
+      {
+        id:11,
+        category:"課文理解",
+        question:"作者在芭樂園裡抬頭看到樹上結滿什麼？",
+        options:["綠寶石","紅寶石","金幣","白雲"],
+        answer:"綠寶石",
+        explanation:"課文把芭樂比喻成大大小小的綠寶石。"
+      },
+      {
+        id:12,
+        category:"字詞理解",
+        question:"「森嚴」最接近下列哪一個意思？",
+        options:["嚴密不可侵犯","林木很多","非常安靜","很熱鬧"],
+        answer:"嚴密不可侵犯",
+        explanation:"「防衛森嚴」表示守備很嚴密，不容易闖入。"
+      },
+      {
+        id:13,
+        category:"字詞理解",
+        question:"「瞥見」最接近下列哪一個意思？",
+        options:["突然看到","認真研究","慢慢觀察","仔細尋找"],
+        answer:"突然看到",
+        explanation:"「瞥見」是一下子、不經意地看到。"
+      },
+      {
+        id:14,
+        category:"字詞理解",
+        question:"「青澀」在課文中比較接近哪一個意思？",
+        options:["成熟香甜","未熟、帶苦澀","非常鹹","完全沒有味道"],
+        answer:"未熟、帶苦澀",
+        explanation:"青澀通常指還沒成熟，帶著生澀、微苦、不甘滑順的味道。"
+      },
+      {
+        id:15,
+        category:"修辭",
+        question:"「一股青澀味像條青竹絲，火速鑽進嘴裡。」這句主要用了哪一種修辭？",
+        options:["明喻","排比","引用","設問"],
+        answer:"明喻",
+        explanation:"句中有「像條青竹絲」，所以是明喻。"
+      },
+      {
+        id:16,
+        category:"課文理解",
+        question:"作者偷摘芭樂後，隔天和誰一起去向伯伯道歉？",
+        options:["阿嬤","媽媽","老師","同學"],
+        answer:"阿嬤",
+        explanation:"課文寫到第二天阿嬤帶著作者和一大袋蓮霧去伯伯家道歉。"
+      },
+      {
+        id:17,
+        category:"情意理解",
+        question:"哪一句最能看出作者偷摘水果後感到羞愧？",
+        options:["陽光把我的臉晒得比蓮霧還要紅","伯伯摸摸我的頭","我想應該是阿嬤家陽光的關係吧","陽光像金雨般灑下來"],
+        answer:"陽光把我的臉晒得比蓮霧還要紅",
+        explanation:"這句不是只在寫顏色，也在寫作者因做錯事而臉紅、害羞的心情。"
+      },
+      {
+        id:18,
+        category:"課文大意",
+        question:"這篇課文前半段和後半段的內容，最合理的說法是什麼？",
+        options:["前半段寫陽光的美好想像，後半段寫摘芭樂事件與反省","前半段寫科學知識，後半段寫天氣預報","前半段寫市場價格，後半段寫農夫工作","前半段寫旅行，後半段寫比賽"],
+        answer:"前半段寫陽光的美好想像，後半段寫摘芭樂事件與反省",
+        explanation:"這是整篇文章的結構重點，很容易考。"
+      },
+      {
+        id:19,
+        category:"自學補充",
+        question:"課文與練習提醒我們，顏色字放在不同情境裡可能會怎樣？",
+        options:["有不同意義","永遠都只表示顏色","一定是成語","一定是錯字"],
+        answer:"有不同意義",
+        explanation:"像「紅、綠、白」有時不只是顏色，也可能表示其他意思，要看上下文。"
+      },
+      {
+        id:20,
+        category:"主旨",
+        question:"下列哪一項最接近本文主旨？",
+        options:["善用感官與想像，體會生活中的趣味與美好","說明偷摘水果的方法","介紹果園的管理方式","告訴大家水果越多越好"],
+        answer:"善用感官與想像，體會生活中的趣味與美好",
+        explanation:"這篇文章真正想帶出的，是用感官和想像去感受生活，同時也包含童年經驗中的反省。"
+      }
+    ];
 
-                    <div className="bg-white rounded-[2rem] p-8 shadow-xl border-4 border-green-100 relative overflow-hidden">
-                        {feedback && (
-                            <div className={`absolute inset-0 flex flex-col items-center justify-center z-10 bg-opacity-95 ${feedback === 'correct' ? 'bg-green-100' : 'bg-red-100'}`}>
-                                <div className={`text-9xl mb-4 ${feedback === 'correct' ? 'animate-bounce' : 'animate-pulse'}`}>
-                                    {feedback === 'correct' ? '⭕' : '❌'}
-                                </div>
-                                <h2 className={`text-4xl font-bold ${feedback === 'correct' ? 'text-green-600' : 'text-red-600'}`}>
-                                    {feedback === 'correct' ? '太棒了！答對了！' : '哎呀，再想一下！'}
-                                </h2>
-                                <p className="text-2xl mt-4 text-gray-700 px-8 text-center">
-                                    {q.type === 'input'
-                                        ? (feedback === 'correct' ? 'Nice！你打得很準～' : `正確答案是：${q.answer}`)
-                                        : (q.explanation || '')
-                                    }
-                                </p>
-                            </div>
-                        )}
+    // =============================
+    // 狀態
+    // =============================
+    const state = {
+      studentName: "",
+      currentScreen: "login",
+      studyIndex: 0,
+      videoIndex: 0,
+      quizIndex: 0,
+      correctCount: 0,
+      selectedLocked: false,
+      answers: [],
+      quizStartedAt: null,
+      elapsedSec: 0,
+      timerHandle: null,
+      uploadStatus: "idle"
+    };
 
-                        <div className="flex justify-between items-center mb-6">
-                            <span className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-bold text-xl">
-                                Q{idx + 1} / {questions.length} - {q.category}
-                            </span>
-                        </div>
+    const FRUITS = ["🍎","🍇","🍐","🍉","🍓","🥭","🍊","🍈"];
 
-                        <h3 className="text-med font-bold text-gray-800 mb-10 leading-relaxed">
-                            {q.question}
-                        </h3>
+    // =============================
+    // DOM
+    // =============================
+    const screens = {
+      login: document.getElementById("screen-login"),
+      menu: document.getElementById("screen-menu"),
+      video: document.getElementById("screen-video"),
+      study: document.getElementById("screen-study"),
+      quiz: document.getElementById("screen-quiz"),
+      result: document.getElementById("screen-result"),
+      history: document.getElementById("screen-history"),
+    };
 
-                        {/* 題型：輸入 */}
-                        {q.type === 'input' ? (
-                            <div className="space-y-5">
-                                <input
-                                    value={inputAns}
-                                    disabled={!!feedback}
-                                    onChange={(e) => setInputAns(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') submitInput(); }}
-                                    className="w-full p-6 text-3xl text-center border-4 border-purple-200 rounded-2xl focus:border-purple-500 outline-none transition-colors bg-purple-50"
-                                    placeholder="在這裡輸入答案"
-                                />
-                                <button
-                                    onClick={submitInput}
-                                    disabled={!!feedback}
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white text-3xl font-black py-6 rounded-2xl btn-interact"
-                                >
-                                    送出答案 <ArrowRight size={28} />
-                                </button>
-                                <p className="text-center text-gray-500 text-lg">
-                                    小提示：可以直接按 Enter 送出～
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {q.options.map((opt, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handleAnswer(opt)}
-                                        className="bg-white border-4 border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-gray-700 font-bold text-2xl md:text-3xl py-8 px-4 rounded-2xl btn-interact text-center"
-                                    >
-                                        {opt}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    
-                    <button onClick={onBack} className="mt-8 text-gray-500 text-xl underline self-center">
-                        暫停，回選單
-                    </button>
-                </div>
-            );
-        };
+    const playerPill = document.getElementById("playerPill");
+    const studentNameInput = document.getElementById("studentName");
 
-        // --- 元件：結果與結算區 ---
-        const ResultScreen = ({ score, total, history, onRestart, onUpload, uploadStatus, studentName, packTitle }) => {
-            return (
-                <div className="w-full max-w-3xl flex flex-col items-center fade-in pb-10">
-                    <div className="relative">
-                        <Award size={120} className="text-yellow-500 mb-4 animate-bounce" />
-                        <div className="absolute top-0 right-0 -mr-4 mt-2">✨</div>
-                        <div className="absolute bottom-0 left-0 -ml-4 mb-2">🎉</div>
-                    </div>
-                    
-                    <h2 className="text-5xl font-bold text-gray-800 mb-2">恭喜完成！</h2>
-                    <p className="text-2xl text-gray-600 mb-2">{studentName}，你剛剛通關了：</p>
-                    <p className="text-3xl font-black text-green-700 mb-6">「{packTitle}」</p>
-                    
-                    <div className="bg-white p-8 rounded-3xl shadow-xl border-4 border-yellow-400 w-full text-center mb-8">
-                        <div className="text-2xl text-gray-500 mb-2">本次得分</div>
-                        <div className="text-8xl font-black text-red-500">{score}</div>
-                    </div>
+    const videoPlayer = document.getElementById("videoPlayer");
+    const videoSource = document.getElementById("videoSource");
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-8">
-                        <button 
-                            onClick={onUpload}
-                            disabled={uploadStatus === 'success' || uploadStatus === 'uploading'}
-                            className={`py-4 px-6 rounded-2xl text-2xl font-bold flex items-center justify-center gap-2 btn-interact ${
-                                uploadStatus === 'success' ? 'bg-green-500 text-white' : 
-                                uploadStatus === 'uploading' ? 'bg-gray-400 text-white cursor-wait' :
-                                'bg-blue-600 text-white'
-                            }`}
-                        >
-                            {uploadStatus === 'idle' && <><UploadCloud size={32} /> 上傳成績給老師</>}
-                            {uploadStatus === 'uploading' && <>上傳中...</>}
-                            {uploadStatus === 'success' && <><Check size={32} /> 上傳成功！</>}
-                            {uploadStatus === 'error' && <><X size={32} /> 上傳失敗，請重試</>}
-                        </button>
+    const studyTitle = document.getElementById("studyTitle");
+    const studyContent = document.getElementById("studyContent");
+    const studyTip = document.getElementById("studyTip");
+    const studyIcon = document.getElementById("studyIcon");
+    const studyDots = document.getElementById("studyDots");
 
-                        <button 
-                            onClick={onRestart}
-                            className="bg-yellow-400 text-yellow-900 py-4 px-6 rounded-2xl text-2xl font-bold flex items-center justify-center gap-2 btn-interact"
-                        >
-                            <RotateCcw size={32} /> 再挑戰一次
-                        </button>
-                    </div>
+    const qChip = document.getElementById("qChip");
+    const qCategory = document.getElementById("qCategory");
+    const quizProgress = document.getElementById("quizProgress");
+    const questionText = document.getElementById("questionText");
+    const optionGrid = document.getElementById("optionGrid");
+    const feedbackBox = document.getElementById("feedbackBox");
+    const feedbackTitle = document.getElementById("feedbackTitle");
+    const feedbackText = document.getElementById("feedbackText");
+    const timerText = document.getElementById("timerText");
+    const energyBar = document.getElementById("energyBar");
+    const fruitGrid = document.getElementById("fruitGrid");
+    const correctCount = document.getElementById("correctCount");
+    const liveBadges = document.getElementById("liveBadges");
 
-                    <div className="w-full bg-pink-50 border-4 border-pink-200 p-6 rounded-2xl mb-8">
-                        <h3 className="text-2xl font-bold text-pink-600 mb-4">🌟 課後小任務</h3>
-                        <p className="text-xl text-gray-700 mb-4">請完成這句話並跟同學分享：</p>
-                        <div className="bg-white p-4 rounded-xl text-xl leading-relaxed font-bold text-gray-600">
-                            「我心中的陽光是
-                            <input className="border-b-2 border-gray-400 w-24 mx-2 text-center text-blue-600 focus:outline-none" placeholder="顏色" />
-                            色的，因為
-                            <input className="border-b-2 border-gray-400 w-full mt-2 text-blue-600 focus:outline-none" placeholder="寫下你的原因..." />。」
-                        </div>
-                    </div>
+    const finalScore = document.getElementById("finalScore");
+    const finalCorrect = document.getElementById("finalCorrect");
+    const finalTime = document.getElementById("finalTime");
+    const finalTitle = document.getElementById("finalTitle");
+    const resultSub = document.getElementById("resultSub");
+    const starDisplay = document.getElementById("starDisplay");
+    const reviewList = document.getElementById("reviewList");
 
-                    <div className="w-full">
-                        <h3 className="text-2xl font-bold text-gray-700 mb-4">📝 答題檢討</h3>
-                        <div className="space-y-4">
-                            {history.map((h, i) => (
-                                <div key={i} className={`p-4 rounded-xl border-l-8 ${h.correct ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'} shadow-sm`}>
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-1 text-2xl">{h.correct ? '⭕' : '❌'}</div>
-                                        <div>
-                                            <p className="font-bold text-lg text-gray-800">{h.question}</p>
-                                            <p className="text-gray-600 mt-1">
-                                                你的答案：<span className={h.correct ? 'text-green-600' : 'text-red-600 font-bold'}>{h.userAns}</span>
-                                            </p>
-                                            {!h.correct && (
-                                                <p className="text-green-600 mt-1 font-bold">正確答案：{h.correctAns}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
+    const historyTableBody = document.getElementById("historyTableBody");
+    const historyEmpty = document.getElementById("historyEmpty");
 
-        // --- 主程式 ---
-        const App = () => {
-            const [view, setView] = useState('login'); 
-            const [studentName, setStudentName] = useState('');
-            const [quizState, setQuizState] = useState({
-                score: 0,
-                history: [],
-                completed: false,
-                packTitle: ''
-            });
-            const [localHistory, setLocalHistory] = useState([]);
-            const [uploadStatus, setUploadStatus] = useState('idle');
+    // =============================
+    // 工具
+    // =============================
+    function showScreen(name){
+      Object.values(screens).forEach(el => el.classList.remove("active"));
+      screens[name].classList.add("active");
+      state.currentScreen = name;
 
-            useEffect(() => {
-                const saved = localStorage.getItem('sunlight_lesson_history');
-                if (saved) {
-                    try {
-                        setLocalHistory(JSON.parse(saved));
-                    } catch(e) {}
-                }
-            }, []);
+      if(name === "history"){
+        renderHistory();
+      }
+    }
 
-            const handleLogin = (name) => {
-                if(!name.trim()) return alert("請輸入名字喔！");
-                setStudentName(name);
-                setView('menu');
-            };
+    function updatePlayerPill(){
+      if(state.studentName){
+        playerPill.style.display = "block";
+        playerPill.textContent = `👤 ${state.studentName}`;
+      }else{
+        playerPill.style.display = "none";
+      }
+    }
 
-            const saveRecord = (finalScore, detailHistory, packTitle) => {
-                const record = {
-                    date: new Date().toLocaleString(),
-                    name: studentName,
-                    score: finalScore,
-                    pack: packTitle,
-                    details: detailHistory
-                };
-                const newHistory = [record, ...localHistory];
-                setLocalHistory(newHistory);
-                localStorage.setItem('sunlight_lesson_history', JSON.stringify(newHistory));
-                return record;
-            };
+    function formatTime(sec){
+      const m = Math.floor(sec / 60).toString().padStart(2,"0");
+      const s = Math.floor(sec % 60).toString().padStart(2,"0");
+      return `${m}:${s}`;
+    }
 
-            const uploadToGoogle = async (record) => {
-                setUploadStatus('uploading');
-                const formData = new FormData();
-                formData.append('name', record.name);
-                formData.append('score', record.score);
-                formData.append('date', record.date);
-                formData.append('pack', record.pack);
-                formData.append('detail', JSON.stringify(record.details.map(d => d.correct ? 'O' : 'X')));
+    function getScore(){
+      return Math.round((state.correctCount / quizData.length) * 100);
+    }
 
-                try {
-                    await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        body: formData,
-                        mode: 'no-cors' 
-                    });
-                    setUploadStatus('success');
-                    setTimeout(() => setUploadStatus('idle'), 3000);
-                } catch (error) {
-                    console.error("Upload failed", error);
-                    setUploadStatus('error');
-                }
-            };
+    function getTitleByScore(score){
+      if(score >= 95) return "陽光傳說";
+      if(score >= 85) return "果園大師";
+      if(score >= 70) return "想像高手";
+      if(score >= 60) return "陽光學徒";
+      return "陽光新手";
+    }
 
-            const questionSets = {
-                challenge: {
-                    title: '課文理解挑戰',
-                    sub: '成語＋修辭（老師最愛出的那種）',
-                    questions: comprehensionChallengeData
-                },
-                warmup: {
-                    title: '快速暖身',
-                    sub: '注音／國字／基礎理解（先熱身再開大）',
-                    questions: warmupQuizData
-                }
-            };
+    function getStars(score){
+      if(score >= 90) return "⭐⭐⭐⭐⭐";
+      if(score >= 80) return "⭐⭐⭐⭐";
+      if(score >= 70) return "⭐⭐⭐";
+      if(score >= 60) return "⭐⭐";
+      return "⭐";
+    }
 
-            return (
-                <div className="min-h-screen w-full max-w-4xl mx-auto bg-white shadow-2xl overflow-hidden relative font-sans">
-                    <header className="bg-yellow-400 p-4 border-b-4 border-yellow-600 flex justify-between items-center z-10 relative">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-white p-2 rounded-full border-2 border-orange-500">
-                                <Sun size={32} color="#F59E0B" className="animate-spin-slow" />
-                            </div>
-                            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 tracking-wider">色香味的陽光</h1>
-                        </div>
-                        {studentName && (
-                            <div className="bg-white px-4 py-2 rounded-xl border-2 border-yellow-600 font-bold text-lg text-yellow-800">
-                                👤 {studentName}
-                            </div>
-                        )}
-                    </header>
+    function getBadges(correct){
+      const badges = [];
+      if(correct >= 5) badges.push("🍎 初階果農");
+      if(correct >= 10) badges.push("☀️ 陽光採集者");
+      if(correct >= 15) badges.push("🍇 修辭獵人");
+      if(correct >= 18) badges.push("🏆 課文破關王");
+      return badges;
+    }
 
-                    <main className="p-4 md:p-8 min-h-[80vh] flex flex-col items-center justify-center relative">
-                        {view === 'login' && <LoginScreen onLogin={handleLogin} />}
-                        {view === 'menu' && <MainMenu setView={setView} localHistory={localHistory} studentName={studentName}/>}
-                        {view === 'video' && <VideoSection onBack={() => setView('menu')} />}
-                        {view === 'study' && <StudySection onBack={() => setView('menu')} />}
-                        {view === 'quiz' && (
-                            <QuizSection 
-                                questionSets={questionSets}
-                                onComplete={(score, history, packTitle) => {
-                                    const record = saveRecord(score, history, packTitle);
-                                    setQuizState({ score, history, completed: true, packTitle });
-                                    setView('result');
-                                }} 
-                                onBack={() => setView('menu')}
-                            />
-                        )}
-                        {view === 'result' && (
-                            <ResultScreen 
-                                score={quizState.score} 
-                                total={quizState.history.length}
-                                history={quizState.history}
-                                studentName={studentName}
-                                packTitle={quizState.packTitle}
-                                onUpload={() => uploadToGoogle({
-                                    name: studentName,
-                                    score: quizState.score,
-                                    date: new Date().toLocaleString(),
-                                    pack: quizState.packTitle,
-                                    details: quizState.history
-                                })}
-                                uploadStatus={uploadStatus}
-                                onRestart={() => setView('menu')}
-                            />
-                        )}
-                    </main>
+    function saveLocalRecord(record){
+      const key = "sunlight_lesson_history_v2";
+      let records = [];
+      try{
+        records = JSON.parse(localStorage.getItem(key) || "[]");
+      }catch(e){
+        records = [];
+      }
+      records.unshift(record);
+      localStorage.setItem(key, JSON.stringify(records));
+    }
 
-                    <div className="absolute bottom-0 left-0 w-full h-4 bg-gradient-to-r from-green-400 via-yellow-400 to-blue-400"></div>
-                </div>
-            );
-        };
+    function loadLocalRecords(){
+      const key = "sunlight_lesson_history_v2";
+      try{
+        return JSON.parse(localStorage.getItem(key) || "[]");
+      }catch(e){
+        return [];
+      }
+    }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+    function clearLocalRecords(){
+      localStorage.removeItem("sunlight_lesson_history_v2");
+    }
+
+    // =============================
+    // Login & Menu
+    // =============================
+    document.getElementById("btnStartLogin").addEventListener("click", () => {
+      const name = studentNameInput.value.trim();
+      if(!name){
+        alert("請先輸入姓名喔！");
+        studentNameInput.focus();
+        return;
+      }
+      state.studentName = name;
+      updatePlayerPill();
+      showScreen("menu");
+    });
+
+    studentNameInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter"){
+        document.getElementById("btnStartLogin").click();
+      }
+    });
+
+    document.getElementById("btnGoVideo").addEventListener("click", () => {
+      showScreen("video");
+      loadVideo(0);
+    });
+
+    document.getElementById("btnGoStudy").addEventListener("click", () => {
+      showScreen("study");
+      renderStudy();
+    });
+
+    document.getElementById("btnGoQuiz").addEventListener("click", () => {
+      startQuiz();
+      showScreen("quiz");
+    });
+
+    document.getElementById("btnGoHistory").addEventListener("click", () => {
+      showScreen("history");
+    });
+
+    document.querySelectorAll("[data-back-menu]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        stopTimer();
+        showScreen("menu");
+      });
+    });
+
+    // =============================
+    // Video
+    // =============================
+    function loadVideo(index){
+      state.videoIndex = index;
+      videoSource.src = videos[index].url;
+      videoPlayer.load();
+      document.querySelectorAll(".tab").forEach((tab, i) => {
+        tab.classList.toggle("active", i === index);
+      });
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        const idx = Number(tab.dataset.videoIndex);
+        loadVideo(idx);
+      });
+    });
+
+    // =============================
+    // Study
+    // =============================
+    function renderStudyDots(){
+      studyDots.innerHTML = "";
+      studyCards.forEach((_, idx) => {
+        const d = document.createElement("div");
+        d.className = "dot" + (idx === state.studyIndex ? " active" : "");
+        studyDots.appendChild(d);
+      });
+    }
+
+    function renderStudy(){
+      const item = studyCards[state.studyIndex];
+      studyTitle.textContent = item.title;
+      studyContent.innerHTML = item.content;
+      studyTip.textContent = "💡 " + item.tip;
+      studyIcon.textContent = item.icon;
+      renderStudyDots();
+    }
+
+    document.getElementById("btnNextStudy").addEventListener("click", () => {
+      state.studyIndex = (state.studyIndex + 1) % studyCards.length;
+      renderStudy();
+    });
+
+    document.getElementById("btnPrevStudy").addEventListener("click", () => {
+      state.studyIndex = (state.studyIndex - 1 + studyCards.length) % studyCards.length;
+      renderStudy();
+    });
+
+    // =============================
+    // Quiz
+    // =============================
+    function startQuiz(){
+      state.quizIndex = 0;
+      state.correctCount = 0;
+      state.answers = [];
+      state.selectedLocked = false;
+      state.elapsedSec = 0;
+      state.quizStartedAt = Date.now();
+      feedbackBox.className = "feedback";
+      feedbackTitle.textContent = "";
+      feedbackText.textContent = "";
+      buildFruitGrid();
+      renderLiveBadges();
+      updateEnergy();
+      correctCount.textContent = "0";
+      startTimer();
+      renderQuestion();
+    }
+
+    function startTimer(){
+      stopTimer();
+      timerText.textContent = "00:00";
+      state.timerHandle = setInterval(() => {
+        state.elapsedSec++;
+        timerText.textContent = formatTime(state.elapsedSec);
+      }, 1000);
+    }
+
+    function stopTimer(){
+      if(state.timerHandle){
+        clearInterval(state.timerHandle);
+        state.timerHandle = null;
+      }
+    }
+
+    function buildFruitGrid(){
+      fruitGrid.innerHTML = "";
+      for(let i=0;i<8;i++){
+        const div = document.createElement("div");
+        div.className = "fruit";
+        div.textContent = FRUITS[i];
+        fruitGrid.appendChild(div);
+      }
+      refreshFruitGrid();
+    }
+
+    function refreshFruitGrid(){
+      const collected = Math.floor((state.correctCount / quizData.length) * 8);
+      [...fruitGrid.children].forEach((el, idx) => {
+        el.classList.toggle("collected", idx < collected);
+      });
+    }
+
+    function updateEnergy(){
+      const percent = (state.correctCount / quizData.length) * 100;
+      energyBar.style.width = percent + "%";
+      refreshFruitGrid();
+      renderLiveBadges();
+    }
+
+    function renderLiveBadges(){
+      liveBadges.innerHTML = "";
+      const badges = getBadges(state.correctCount);
+      if(!badges.length){
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = "🪴 準備起飛";
+        liveBadges.appendChild(badge);
+        return;
+      }
+      badges.forEach(text => {
+        const span = document.createElement("span");
+        span.className = "badge";
+        span.textContent = text;
+        liveBadges.appendChild(span);
+      });
+    }
+
+    function renderQuestion(){
+      const q = quizData[state.quizIndex];
+      state.selectedLocked = false;
+      qChip.textContent = `Q${state.quizIndex + 1} / ${quizData.length}`;
+      qCategory.textContent = q.category;
+      quizProgress.style.width = `${(state.quizIndex / quizData.length) * 100}%`;
+      questionText.textContent = q.question;
+      optionGrid.innerHTML = "";
+      feedbackBox.className = "feedback";
+      feedbackTitle.textContent = "";
+      feedbackText.textContent = "";
+
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.textContent = opt;
+        btn.addEventListener("click", () => handleAnswer(opt, btn));
+        optionGrid.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selected, selectedBtn){
+      if(state.selectedLocked) return;
+      state.selectedLocked = true;
+
+      const q = quizData[state.quizIndex];
+      const isCorrect = selected === q.answer;
+
+      [...optionGrid.children].forEach(btn => {
+        btn.disabled = true;
+        if(btn.textContent === q.answer){
+          btn.classList.add("correct");
+        }
+        if(btn.textContent === selected && !isCorrect){
+          btn.classList.add("wrong");
+        }
+      });
+
+      if(isCorrect){
+        state.correctCount++;
+        correctCount.textContent = String(state.correctCount);
+      }
+
+      state.answers.push({
+        id:q.id,
+        category:q.category,
+        question:q.question,
+        selected,
+        answer:q.answer,
+        correct:isCorrect,
+        explanation:q.explanation
+      });
+
+      updateEnergy();
+
+      feedbackBox.className = "feedback show " + (isCorrect ? "correct" : "wrong");
+      feedbackTitle.textContent = isCorrect ? "⭕ 太棒了！答對了！" : "❌ 再想一下，這題差一點點";
+      feedbackText.textContent = q.explanation;
+
+      setTimeout(() => {
+        state.quizIndex++;
+        if(state.quizIndex < quizData.length){
+          renderQuestion();
+        }else{
+          finishQuiz();
+        }
+      }, 1700);
+    }
+
+    document.getElementById("btnPauseQuiz").addEventListener("click", () => {
+      stopTimer();
+      showScreen("menu");
+    });
+
+    function finishQuiz(){
+      stopTimer();
+      quizProgress.style.width = "100%";
+
+      const score = getScore();
+      const title = getTitleByScore(score);
+      const stars = getStars(score);
+
+      finalScore.textContent = score;
+      finalCorrect.textContent = `${state.correctCount} / ${quizData.length}`;
+      finalTime.textContent = formatTime(state.elapsedSec);
+      finalTitle.textContent = title;
+      starDisplay.textContent = stars;
+      resultSub.textContent = `${state.studentName}，你今天成功蒐集了 ${state.correctCount} 題的陽光能量，這波很可以。`;
+
+      renderReview();
+
+      const record = {
+        date: new Date().toLocaleString(),
+        name: state.studentName,
+        score,
+        correct: state.correctCount,
+        total: quizData.length,
+        elapsed: formatTime(state.elapsedSec),
+        title,
+        details: state.answers
+      };
+      saveLocalRecord(record);
+
+      showScreen("result");
+    }
+
+    function renderReview(){
+      reviewList.innerHTML = "";
+      state.answers.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "review-item " + (item.correct ? "correct" : "wrong");
+        div.innerHTML = `
+          <div class="review-q">${item.correct ? "⭕" : "❌"} 第 ${idx + 1} 題：${item.question}</div>
+          <div class="review-a">你的答案：<strong>${item.selected}</strong></div>
+          ${item.correct ? "" : `<div class="review-a">正確答案：<strong>${item.answer}</strong></div>`}
+          <div class="review-a">解析：${item.explanation}</div>
+        `;
+        reviewList.appendChild(div);
+      });
+    }
+
+    document.getElementById("btnReplay").addEventListener("click", () => {
+      startQuiz();
+      showScreen("quiz");
+    });
+
+    document.getElementById("btnUploadScore").addEventListener("click", async () => {
+      if(!GOOGLE_SCRIPT_URL){
+        alert("你還沒有填入 Google Apps Script 網址喔！\n請先把 GOOGLE_SCRIPT_URL 換成自己的 GAS 部署網址。");
+        return;
+      }
+
+      const payload = {
+        name: state.studentName,
+        score: getScore(),
+        correct: state.correctCount,
+        total: quizData.length,
+        elapsed: formatTime(state.elapsedSec),
+        date: new Date().toLocaleString(),
+        title: getTitleByScore(getScore()),
+        missionColor: document.getElementById("missionColor").value.trim(),
+        missionReason: document.getElementById("missionReason").value.trim(),
+        detail: state.answers.map(x => x.correct ? "O" : "X").join("")
+      };
+
+      const btn = document.getElementById("btnUploadScore");
+      const oldText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "☁️ 上傳中...";
+
+      try{
+        const formData = new FormData();
+        Object.entries(payload).forEach(([k,v]) => formData.append(k, v));
+
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method:"POST",
+          body:formData,
+          mode:"no-cors"
+        });
+
+        btn.textContent = "✅ 上傳成功！";
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = oldText;
+        }, 2500);
+      }catch(err){
+        console.error(err);
+        btn.disabled = false;
+        btn.textContent = "❌ 上傳失敗，請重試";
+        setTimeout(() => {
+          btn.textContent = oldText;
+        }, 2500);
+      }
+    });
+
+    // =============================
+    // History
+    // =============================
+    function renderHistory(){
+      const records = loadLocalRecords();
+      historyTableBody.innerHTML = "";
+
+      if(!records.length){
+        historyEmpty.style.display = "block";
+        return;
+      }
+
+      historyEmpty.style.display = "none";
+
+      const filtered = state.studentName
+        ? records.filter(r => r.name === state.studentName)
+        : records;
+
+      if(!filtered.length){
+        historyEmpty.style.display = "block";
+        return;
+      }
+
+      filtered.forEach(rec => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${rec.date || ""}</td>
+          <td>${rec.name || ""}</td>
+          <td><strong style="color:#ef5350">${rec.score ?? ""}</strong></td>
+          <td>${rec.correct ?? ""} / ${rec.total ?? ""}</td>
+          <td>${rec.elapsed || ""}</td>
+          <td><strong style="color:#1976d2">${rec.title || ""}</strong></td>
+        `;
+        historyTableBody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("btnClearHistory").addEventListener("click", () => {
+      const ok = confirm("確定要清除這台裝置上的學習紀錄嗎？");
+      if(!ok) return;
+      clearLocalRecords();
+      renderHistory();
+    });
+
+    // =============================
+    // 初始
+    // =============================
+    function init(){
+      updatePlayerPill();
+      renderStudy();
+      renderHistory();
+      loadVideo(0);
+    }
+
+    init();
+  </script>
 </body>
 </html>
